@@ -1,0 +1,23 @@
+{
+    "name"         : "node-red-contrib-dsm",
+    "version"      : "0.1.0",
+    "description"  : "A dynamic state machine node based on the finite state machine model.",
+    "dependencies": {
+    },
+    "keywords": [ 
+      "dynamic state machine",
+      "finite state machine",
+      "state machine",
+      "state",
+      "transition",
+      "logic"
+    ],
+    "author": "cflurin",
+      "license": "ISC",
+  
+    "node-red": {
+        "nodes": {
+            "dsm": "dsm.js"
+        }
+    }
+}

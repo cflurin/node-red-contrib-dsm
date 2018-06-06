@@ -1,0 +1,71 @@
+<script type="text/x-red" data-template-name="dsm">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="dsm">
+    <p>A dynamic state machine node based on the finite state machine model.</p>
+    
+    <h3>Inputs</h3>
+      <dl class="message-properties">
+      <dt>payload
+          <span class="property-type">object</span>
+      </dt>
+      <dd> dsm configuration</dd>
+      <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd> set</dd>
+      </dl>
+      <dl class="message-properties">
+        <dt>msg
+          <span class="property-type">object</span></dt>
+        <dd>The triggerInput as defined in the configuration, default <code>topic</code>.</dd>
+      </dl> 
+    <h3>Outputs</h3>
+      <dl class="message-properties">
+        <dt>msg
+          <span class="property-type">object</span></dt>
+        <dd>The currentState added to the message as defined in the configuration, default <code>topic</code>.</dd>
+      </dl>
+    <h3>Details</h3>
+    <p>A dsm configuration example:</p>
+<pre>{
+  "currentState": "closed",
+  "states": {
+      "opened": {
+          "close": "closed",
+          "stop": "stopped"
+      },
+      "closed": {
+          "open": "opened",
+          "stop": "stopped"
+      },
+      "stopped": {
+          "open": "opened",
+          "close": "closed"
+      }
+  }
+}</pre>    
+    <h3>References</h3>
+      <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite state machine</a></li>
+      </ul>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('dsm',{
+        category: 'advanced',
+        color: "#E9967A",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "switch.png",
+        label: function() {
+            return this.name||"dsm";
+        }
+    });
+</script>
+
