@@ -6,12 +6,67 @@ The `dsm` node is a pure Node.js package and doesn't use any external libraries.
 ### Principle of operation [Source Wikipedia]
 *A finite-state machine (FSM) is an abstract machine that can be in exactly one of a finite number of states at any given time. The FSM can change from one state to another in response to some external inputs; the change from one state to another is called a transition. A FSM is defined by a list of its states, its initial state, and the conditions for each transition.*
 
-###  Examples
+##  Examples
 
-**Door**
+### Door
 
 ![dsn1](https://user-images.githubusercontent.com/5056710/41049308-e9fa0dc8-69b0-11e8-8b0a-0c27109ec324.jpeg)
 
-**Garage door**
+#### Configuration
+
+```js
+{
+    "currentState": "closed",
+    "states": {
+        "opened": {
+            "close": "closed",
+            "stop": "stopped"
+        },
+        "closed": {
+            "open": "opened",
+            "stop": "stopped"
+        },
+        "stopped": {
+            "open": "opened",
+            "close": "closed"
+        }
+    }
+}
+```
+
+### Garage door
 
 ![dsn2](https://user-images.githubusercontent.com/5056710/41049656-b68dd748-69b1-11e8-820b-84ff3c9015c3.jpeg)
+
+#### Configuration
+
+```js
+{
+    "triggerInput": "topic",
+    "stateOutput": "payload",
+    "currentState": "closed",
+    "states": {
+        "opened": {
+            "click": "closing"
+        },
+        "closed": {
+            "click": "opening"
+        },
+        "opening": {
+            "limit_switch": "opened",
+            "click": "opening_stopped"
+        },
+        "closing": {
+            "limit_switch": "closed",
+            "click": "closing_stopped"
+        },
+        "opening_stopped": {
+            "click": "closing"
+        },
+        "closing_stopped": {
+            "click": "opening"
+        }
+    }
+}
+```
+
