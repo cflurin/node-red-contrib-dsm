@@ -34,7 +34,7 @@ The `dsm` node is a pure Node.js package and doesn't use any external libraries,
 }
 ```
 
-#### Flow
+#### Flow
 
 ```js
 [{"id":"8b02669f.7ddd98","type":"debug","z":"57ef434a.058a6c","name":"","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","x":510,"y":940,"wires":[]},{"id":"68c0e2d5.3b798c","type":"inject","z":"57ef434a.058a6c","name":"open","topic":"open","payload":"your open payload","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":110,"y":940,"wires":[["3b0c292.2da33d6"]]},{"id":"cc79a219.ec7d6","type":"inject","z":"57ef434a.058a6c","name":"set","topic":"set","payload":"{\"currentState\":\"closed\",\"states\":{\"opened\":{\"close\":\"closed\",\"stop\":\"stopped\"},\"closed\":{\"open\":\"opened\",\"stop\":\"stopped\"},\"stopped\":{\"open\":\"opened\",\"close\":\"closed\"}}}","payloadType":"json","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":110,"y":880,"wires":[["3b0c292.2da33d6"]]},{"id":"fae17b11.e48a88","type":"inject","z":"57ef434a.058a6c","name":"close","topic":"close","payload":"your close payload","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":110,"y":980,"wires":[["3b0c292.2da33d6"]]},{"id":"3b0c292.2da33d6","type":"dsm","z":"57ef434a.058a6c","name":"door","x":310,"y":940,"wires":[["8b02669f.7ddd98"]]},{"id":"caac460e.2942c8","type":"inject","z":"57ef434a.058a6c","name":"stop","topic":"stop","payload":"your stop payload","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":110,"y":1020,"wires":[["3b0c292.2da33d6"]]}]
