@@ -26,13 +26,13 @@ module.exports = function(RED) {
       } else {  
           if (typeof context.keys()[0] === "undefined") {
               msg = null;
-              sta = {fill:"red", text:"sm undefined."};
+              sta = {fill:"red", text:"dsm undefined."};
           } else {
               sm = context.get('sm');
               triggerInput = sm.triggerInput || "topic";
               stateOutput = sm.stateOutput || "topic";
               const state = sm.currentState;
-              const tran = msg[triggerInput];
+              const tran = RED.util.getMessageProperty(msg,triggerInput);
               if (typeof sm.states[state] === "undefined") {
                   msg = null;
                   sta = {fill:"red", text:state+" undefined."};
