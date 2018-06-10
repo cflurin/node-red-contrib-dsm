@@ -25,7 +25,6 @@ module.exports = function(RED) {
           sta = {fill:"green", text:sm.currentState};
       } else {  
           if (typeof context.keys()[0] === "undefined") {
-              msg = null;
               sta = {fill:"red", text:"dsm undefined."};
           } else {
               sm = context.get('sm');
@@ -52,12 +51,12 @@ module.exports = function(RED) {
                       }
                   }
               }
+              this.send(msg);
           }
       }
 
       context.set('sm', sm);
       this.status({fill:sta.fill,shape:"dot",text:sta.text});
-      this.send(msg);
     });
   }
   RED.nodes.registerType("dsm",DsmNode);    
