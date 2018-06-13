@@ -34,12 +34,12 @@ payload:
     }
 }
 ```
-**Note:** 
 
-The `triggerInput` and `stateOutput` can be omitted (default  `topic`).
-The `globalOutput`and `flowOutput` can be omitted (default  `false`).
+`triggerInput`, `stateOutput`, `globalOutput`and `flowOutput`can be omitted.
+`triggerInput`, `stateOutput` default `topic`.
+`globalOutput`, `flowOutput` default `false`.
 
-If the `globalOutput` is defined, the global variable is additionally set. If the `flowlOutput` is defined, the flow variable is additionally set.
+If `globalOutput` or  `flowlOutput` is defined, the corresponding variable is additionally set.
 
 When the node receives a trigger with a transition it will change from one state to another:
 
