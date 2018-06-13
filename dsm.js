@@ -11,6 +11,8 @@ module.exports = function(RED) {
       var sta = {};
       var trans = [];
       var context = this.context();
+      var flow = this.context().flow;
+      var global = this.context().global;
 
       if (msg.topic === "set") {
           sm = msg.payload;
@@ -54,7 +56,15 @@ module.exports = function(RED) {
               this.send(msg);
           }
       }
-
+      
+      const globalOutput = sm.globalOutput || false;
+      const flowOutput = sm.flowOutput || false;
+      if (globalOutput) {
+          global.set(globalOutput, sm.currentState);
+      }
+      if (flowOutput) {
+          flow.set(flowOutput, sm.currentState);
+      }
       context.set('sm', sm);
       this.status({fill:sta.fill,shape:"dot",text:sta.text});
     });
