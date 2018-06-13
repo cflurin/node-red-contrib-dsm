@@ -36,8 +36,10 @@ payload:
 ```
 
 `triggerInput`, `stateOutput`, `globalOutput`and `flowOutput`can be omitted.
-`triggerInput`, `stateOutput` default `topic`.
-`globalOutput`, `flowOutput` default `false`.
+
+`triggerInput` and `stateOutput` default `topic`.
+
+`globalOutput` and `flowOutput` default `false`.
 
 If `globalOutput` or  `flowlOutput` is defined, the corresponding variable is additionally set.
 
