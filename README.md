@@ -50,6 +50,29 @@ topic: "transition"
 payload: any
 ```
 
+### Data and methods
+
+In addition to states and transitions, a `dsm` can also contain arbitrary data and methods.
+Example:
+
+```
+{
+    "stateOutput": "payload",
+    "currentState": "one_state",
+    "states": {
+        "recursive": "one_state"
+    },
+    "data": {
+        "delay": 2000
+    },
+    "methods": {
+        "setDelay": "sm.data.delay = msg.payload;",
+        "getDelay": "msg.delay = sm.data.delay;"
+    }
+}
+```
+Methods can be any valid javascript statements. If the methods name is the sama as the transion name, both the transition and the methode will be processed.
+
 ##  Examples
 
 ### Door

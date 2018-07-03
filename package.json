@@ -6,6 +6,9 @@
     "license": "Apache-2.0",
     "keywords": [
       "node-red",
+      "dsm",
+      "fsm",
+      "fsa",
       "dynamic state machine",
       "finite state machine",
       "state machine",
