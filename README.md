@@ -52,7 +52,7 @@ payload: any
 
 ### Data and methods
 
-In addition to states and transitions, a `dsm` can also contain arbitrary data and methods.
+In addition to states and transitions a `dsm` can also contain arbitrary data and methods.
 Example:
 
 ```
@@ -71,7 +71,7 @@ Example:
     }
 }
 ```
-Methods can be any valid javascript statements. If the methods name is the sama as the transion name, both the transition and the methode will be processed.
+Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method will be processed.
 
 ##  Examples
 
