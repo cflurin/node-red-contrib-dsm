@@ -71,7 +71,7 @@ Example:
     }
 }
 ```
-Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method will be processed.
+Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
 
 ##  Examples
 

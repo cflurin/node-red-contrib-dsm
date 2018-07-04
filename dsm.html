@@ -32,8 +32,12 @@
       </dl>
       
     <h3>Details</h3>
-    <p>A dsm configuration example:</p>
-<pre>{
+    <p>In addition to states and transitions a <code>dsm</code> can also contain arbitrary data and methods.</p>
+    <li><a href="https://github.com/cflurin/node-red-contrib-dsm#data-and-methods">Consult the documentation on GitHub</a></li>
+    <p></p>
+    <h4>A dsm configuration example</h4>
+<pre>
+{
   "currentState": "closed",
   "states": {
       "opened": {
@@ -49,9 +53,8 @@
           "close": "closed"
       }
   }
-}</pre>
-    <p>In addition to states and transitions a `dsm` can also contain arbitrary data and methods.</p>
-    <a href="https://github.com/cflurin/node-red-contrib-dsm#data-and-methods">Consult the documentation on GitHub</a>
+}
+</pre>
     <h3>References</h3>
       <ul>
           <li><a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite state machine</a></li>

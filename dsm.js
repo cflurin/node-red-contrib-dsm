@@ -24,7 +24,7 @@ module.exports = function(RED) {
         case "set":
         case "setdsm":
           sm = msg.payload;
-          set_dsm();
+          set_dsm(msg);
           break;
         case "getdata":
           if (sta.text === "dsm set") {
@@ -64,7 +64,7 @@ module.exports = function(RED) {
       }
     });
     
-    function set_dsm() {
+    function set_dsm(msg) {
       var trans = [];
       const stateOutput = sm.stateOutput || "topic";
       
@@ -79,6 +79,11 @@ module.exports = function(RED) {
         sta = {fill:"green", text:sm.currentState};
       } else {
         sta = {fill:"grey", text:"data"};
+      }
+      
+      if (typeof sm.methods !== "undefined") {
+        const triggerInput = sm.triggerInput || "topic";
+        msg = process_method(msg, RED.util.getMessageProperty(msg,triggerInput));
       }
     }
     
@@ -115,9 +120,9 @@ module.exports = function(RED) {
     
     function process_method(msg, method) {
       if (sm.methods[method]) {
+        output = true;
         eval(sm.methods[method]);
         sta = {fill:"grey", text:"method "+method};
-        output = true;
       }
       return (msg);
     }
