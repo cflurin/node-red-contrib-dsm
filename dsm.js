@@ -22,7 +22,6 @@ module.exports = function(RED) {
       
       switch (topic) {
         case "set":
-        case "setdsm":
           sm = msg.payload;
           set_dsm(msg);
           break;
@@ -82,8 +81,7 @@ module.exports = function(RED) {
       }
       
       if (typeof sm.methods !== "undefined") {
-        const triggerInput = sm.triggerInput || "topic";
-        msg = process_method(msg, RED.util.getMessageProperty(msg,triggerInput));
+        msg = process_method(msg, msg.topic);
       }
     }
     
