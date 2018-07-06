@@ -10,7 +10,12 @@ module.exports = function(RED) {
     var node = this;
     
     this.on('input', function(msg) {
-      const topic = msg.topic.toLowerCase();
+      var topic;
+      if (typeof topic === "string") {
+        topic = msg.topic.toLowerCase();
+      } else {
+        topic = msg.topic;
+      }
       var context = this.context();
 
       if (typeof context.keys()[0] === "undefined") {
@@ -99,6 +104,7 @@ module.exports = function(RED) {
           sta = {fill:"red", text:state+" undefined."};
         } else {
           if (sm.states[state][tran]) {
+            output = true;
             sm.currentState = sm.states[state][tran];
             RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
             sta = {fill:"green", text:sm.currentState};
