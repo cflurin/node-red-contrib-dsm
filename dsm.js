@@ -6,11 +6,13 @@ module.exports = function(RED) {
    
     var sm = {};
     var sta = {};
-    var output = true;
+    var output;
     var node = this;
     
     this.on('input', function(msg) {
       var topic;
+      output = false;
+      
       if (typeof topic === "string") {
         topic = msg.topic.toLowerCase();
       } else {
@@ -30,21 +32,20 @@ module.exports = function(RED) {
           sm = msg.payload;
           set_dsm(msg);
           break;
-        case "getdata":
-          if (sta.text === "dsm set") {
-            msg.data = sm.data;
-          }
-          sta = {fill:"grey", text:"getData"};
-          break;
         default:
           if (sta.text === "dsm set") {
             const triggerInput = sm.triggerInput || "topic";
-            msg = process_tran(msg);
-            if (typeof sm.methods !== "undefined") {
-              msg = process_method(msg, RED.util.getMessageProperty(msg,triggerInput));
+            const method = RED.util.getMessageProperty(msg,triggerInput);
+            if (sm.states) {
+              msg = process_tran(msg);
+            } else {
+              sta = {fill:"yellow", text:"no states."}; 
             }
-          } else {
-            output = false;
+            
+            if (typeof sm.methods !== "undefined") {
+              output = true;
+              msg = process_method(msg, method);
+            }
           }
       }
       
@@ -73,6 +74,7 @@ module.exports = function(RED) {
       const stateOutput = sm.stateOutput || "topic";
       
       if(sm.states) {
+        output = true;
         RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
         Object.keys(sm.states).forEach(function(key) {
           Object.keys(sm.states[key]).forEach(function(s) {
@@ -86,36 +88,30 @@ module.exports = function(RED) {
       }
       
       if (typeof sm.methods !== "undefined") {
-        msg = process_method(msg, msg.topic);
+        msg = process_method(msg, "set");
       }
     }
     
     function process_tran(msg) {
-      if (!sm.states) {
-        output = false;
-        sta = {fill:"yellow", text:"no states."}; 
+      const triggerInput = sm.triggerInput || "topic";
+      const stateOutput = sm.stateOutput || "topic";
+      const state = sm.currentState;
+      const tran = RED.util.getMessageProperty(msg,triggerInput);
+      
+      if (typeof sm.states[state] === "undefined") {
+        sta = {fill:"red", text:state+" undefined."};
       } else {
-        const triggerInput = sm.triggerInput || "topic";
-        const stateOutput = sm.stateOutput || "topic";
-        const state = sm.currentState;
-        const tran = RED.util.getMessageProperty(msg,triggerInput);
-        if (typeof sm.states[state] === "undefined") {
-          output = false;
-          sta = {fill:"red", text:state+" undefined."};
+        if (sm.states[state][tran]) {
+          output = true;
+          sm.currentState = sm.states[state][tran];
+          RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
+          sta = {fill:"green", text:sm.currentState};
         } else {
-          if (sm.states[state][tran]) {
-            output = true;
-            sm.currentState = sm.states[state][tran];
-            RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
-            sta = {fill:"green", text:sm.currentState};
+          sta.fill = "yellow";
+          if(sm.trans.indexOf(tran) > -1) {
+              sta.text = state+" unchanged.";
           } else {
-            output = false;
-            sta.fill = "yellow";
-            if(sm.trans.indexOf(tran) > -1) {
-                sta.text = state+" unchanged.";
-            } else {
-                sta.text = tran+" rejected.";
-            }
+              sta.text = tran+" rejected.";
           }
         }
       }
@@ -124,9 +120,8 @@ module.exports = function(RED) {
     
     function process_method(msg, method) {
       if (sm.methods[method]) {
-        output = true;
         eval(sm.methods[method]);
-        sta = {fill:"grey", text:"method "+method};
+        sta.text = sta.text+" - "+method;
       }
       return (msg);
     }
