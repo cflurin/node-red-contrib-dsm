@@ -10,16 +10,9 @@ module.exports = function(RED) {
     var node = this;
     
     this.on('input', function(msg) {
-      var topic;
+      var context = this.context();
       output = false;
       
-      if (typeof topic === "string") {
-        topic = msg.topic.toLowerCase();
-      } else {
-        topic = msg.topic;
-      }
-      var context = this.context();
-
       if (typeof context.keys()[0] === "undefined") {
         sta = {fill:"red", text:"dsm undefined."};
       } else {
@@ -27,7 +20,7 @@ module.exports = function(RED) {
         sta = {fill:"green", text:"dsm set"};
       }
       
-      switch (topic) {
+      switch (msg.topic) {
         case "set":
           sm = msg.payload;
           set_dsm(msg);
