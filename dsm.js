@@ -42,10 +42,6 @@ module.exports = function(RED) {
           }
       }
       
-      if (sm.data && msg) {
-        msg.data = sm.data;
-      }
-      
       const globalOutput = sm.globalOutput || false;
       const flowOutput = sm.flowOutput || false;
       if (globalOutput) {
@@ -58,6 +54,9 @@ module.exports = function(RED) {
       this.status({fill:sta.fill,shape:"dot",text:sta.text});
       
       if (output) {
+        if (sm.data) {
+          msg.data = sm.data;
+        }
         node.send(msg);
       }
     });
@@ -77,7 +76,7 @@ module.exports = function(RED) {
         sm.trans = trans;
         sta = {fill:"green", text:sm.currentState};
       } else {
-        sta = {fill:"grey", text:"data"};
+        sta = {fill:"yellow", text:"no states."}; 
       }
       
       if (typeof sm.methods !== "undefined") {
