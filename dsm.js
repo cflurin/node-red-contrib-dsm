@@ -14,7 +14,7 @@ module.exports = function(RED) {
       output = false;
       
       if (typeof context.keys()[0] === "undefined") {
-        sta = {fill:"red", text:"dsm undefined."};
+        sta = {fill:"red", text:"dsm undefined"};
       } else {
         sm = context.get('sm');
         sta = {fill:"green", text:"dsm set"};
@@ -22,8 +22,11 @@ module.exports = function(RED) {
       
       switch (msg.topic) {
         case "set":
-          sm = msg.payload;
-          set_dsm(msg);
+          if (typeof msg.payload === "object") {
+            set_dsm(msg);
+          } else {
+            sta = {fill:"red", text:"invalid payload, not an object"};
+          }
           break;
         default:
           if (sta.text === "dsm set") {
@@ -32,7 +35,7 @@ module.exports = function(RED) {
             if (sm.states) {
               msg = process_tran(msg);
             } else {
-              sta = {fill:"yellow", text:"no states."}; 
+              sta = {fill:"yellow", text:"no states"}; 
             }
             
             if (typeof sm.methods !== "undefined") {
@@ -65,6 +68,8 @@ module.exports = function(RED) {
       var trans = [];
       const stateOutput = sm.stateOutput || "topic";
       
+      sm = msg.payload;
+      
       if(sm.states) {
         output = true;
         RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
@@ -76,7 +81,7 @@ module.exports = function(RED) {
         sm.trans = trans;
         sta = {fill:"green", text:sm.currentState};
       } else {
-        sta = {fill:"yellow", text:"no states."}; 
+        sta = {fill:"yellow", text:"no states"}; 
       }
       
       if (typeof sm.methods !== "undefined") {
@@ -91,7 +96,7 @@ module.exports = function(RED) {
       const tran = RED.util.getMessageProperty(msg,triggerInput);
       
       if (typeof sm.states[state] === "undefined") {
-        sta = {fill:"red", text:state+" undefined."};
+        sta = {fill:"red", text:state+" undefined"};
       } else {
         if (sm.states[state][tran]) {
           output = true;
@@ -101,9 +106,9 @@ module.exports = function(RED) {
         } else {
           sta.fill = "yellow";
           if(sm.trans.indexOf(tran) > -1) {
-              sta.text = state+" unchanged.";
+              sta.text = state+" unchanged";
           } else {
-              sta.text = tran+" rejected.";
+              sta.text = tran+" rejected";
           }
         }
       }
