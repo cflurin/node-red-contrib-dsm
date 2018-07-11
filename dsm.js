@@ -116,9 +116,48 @@ module.exports = function(RED) {
     }
     
     function process_method(msg, method) {
-      if (sm.methods[method]) {
-        eval(sm.methods[method]);
-        sta.text = sta.text+" - "+method;
+      var stmnt = sm.methods[method];
+
+      if (stmnt) {
+        sta.text += " - "+method;
+        if (typeof stmnt === "object") {
+          var param;
+          if (typeof sm.data[stmnt.param] !== "undefined") {
+            param = sm.data[stmnt.param];
+          } else {
+            param = Number(stmnt.param);
+          }
+          switch (stmnt.name) {
+            case "timer":
+              setTimeout(function() {
+                node.send(msg)}, param);
+              output = false;
+              sta.text += ", "+param;
+              break;
+            case "watchdog":
+              if (!sm.timeout) {
+                sm.timeout = {};
+              }
+              if (sm.timeout[method]) {
+                 clearTimeout(sm.timeout[method]);
+              }
+              
+              sm.timeout[method] = setTimeout(function() {
+                node.send(msg)}, param);
+                
+              output = false;
+              sta.text += ", "+param;
+              break;
+            default:
+              output = false;
+              sta = {fill:"red", text: method+ " undefined"};
+          }
+        } else {
+          eval(sm.methods[method]);
+        }
+      } else {
+        output = false;
+        sta = {fill:"red", text: method+ " undefined"};
       }
       return (msg);
     }
