@@ -118,9 +118,15 @@ module.exports = function(RED) {
     function process_method(msg, method) {
       var stmnt = sm.methods[method];
 
-      if (stmnt) {
+      if (!stmnt) {
+        output = false;
+        sta = {fill:"red", text: method+ " undefined"};
+      } else {
         sta.text += " - "+method;
-        if (typeof stmnt === "object") {
+        
+        if (typeof stmnt === "string") {
+          eval(sm.methods[method]);
+        } else {
           var param;
           if (typeof sm.data[stmnt.param] !== "undefined") {
             param = sm.data[stmnt.param];
@@ -128,6 +134,14 @@ module.exports = function(RED) {
             param = Number(stmnt.param);
           }
           switch (stmnt.name) {
+            case "setData":
+              const triggerInput = sm.triggerInput || "topic";
+              const name = RED.util.getMessageProperty(msg,triggerInput);
+              sm.data[name] = msg.payload; output = false;
+              break;
+            case "getData":
+              msg.payload = sm.data;
+              break;
             case "timer":
               setTimeout(function() {
                 node.send(msg)}, param);
@@ -152,12 +166,7 @@ module.exports = function(RED) {
               output = false;
               sta = {fill:"red", text: method+ " undefined"};
           }
-        } else {
-          eval(sm.methods[method]);
         }
-      } else {
-        output = false;
-        sta = {fill:"red", text: method+ " undefined"};
       }
       return (msg);
     }
