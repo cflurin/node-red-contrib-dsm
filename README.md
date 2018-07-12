@@ -73,6 +73,79 @@ Example:
 ```
 Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
 
+### Build-in methods
+
+To simplify the configuration build-in methods are available.
+
+* setData
+* getData
+* timer
+* watchdog
+
+### Configuration Examples
+
+#### setData and getData
+
+```
+{
+    "data": {
+        "temperature": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "co2": 0
+    },
+    "methods": {
+        "set": "output=false;",
+        "temperature": {
+            "name": "setData"
+        },
+        "humidity": {
+            "name": "setData"
+        },
+        "pressure": {
+            "name": "setData"
+        },
+        "co2": {
+            "name": "setData"
+        },
+        "getData": {
+            "name": "getData"
+        }
+    }
+}
+```
+
+#### timer and watchdog
+
+```
+{
+    "data": {
+        "delay1": 2000,
+        "delay2": 3000
+    },
+    "methods": {
+        "set": "output=false;",
+        "timer1": {
+            "name": "timer",
+            "param": "delay1"
+        },
+        "timer2": {
+            "name": "timer",
+            "param": "delay2"
+        },
+        "timer3": {
+            "name": "timer",
+            "param": 5000
+        },
+        "watchdog1": {
+            "name": "watchdog",
+            "param": 5000
+        }
+    }
+}
+```
+`timer`and `watchdog` param in milliseconds.
+
 ##  Examples
 
 ### Door
