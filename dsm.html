@@ -3,6 +3,13 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+        <div class="form-row" style="margin-bottom: 0px;">
+        <label for="node-input-sm_config" style="width: 100% !important;"><i class="fa fa-list"></i> Config</label>
+        <input type="hidden" id="node-input-sm_config" autofocus="autofocus">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-sm_config-editor"></div>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="dsm">
@@ -66,16 +73,54 @@
         category: 'advanced',
         color: "#E9967A",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            sm_config: {value:"", validate: RED.validators.typedInput("json")}
         },
         inputs:1,
         outputs:1,
         icon: "switch.png",
         label: function() {
-            return this.name||"dsm";
+            var suffix = "";
+            if (this.sm_config) {
+                suffix = " ✔";
+            }
+            return (this.name||"dsm")+suffix;
         },
         inputLabels: "set|trigger|methods",
-        outputLabels: "currentState|data"
+        outputLabels: "currentState|data",
+        sm_config: function() {
+            return (this.name?"# "+this.name+"\n":"")+(this.sm_config||"");
+        },
+        oneditprepare: function() {
+            var that = this;
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-sm_config-editor',
+                mode: 'ace/mode/json',
+                value: $("#node-input-sm_config").val()
+            });
+            this.editor.focus();
+        },
+        oneditsave: function() {
+            $("#node-input-sm_config").val(this.editor.getValue());
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0; i<rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
+        }
     });
 </script>
+
 

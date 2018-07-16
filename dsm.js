@@ -1,46 +1,79 @@
 "use strict";
 module.exports = function(RED) {
   
-  function DsmNode(config) {
-    RED.nodes.createNode(this, config);
-   
-    var sm = {};
+  function DsmNode(n) {
+    RED.nodes.createNode(this, n);
+    
+    this.sm_config = n.sm_config;   
+    this.sm_set;
+    this.sm = {};
+    
+    var node = this;
+    var context = this.context();
+    var global = this.context().global;
+    var flow = this.context().flow;
+    
+    var sm = this.sm;
+    var sm_set = this.sm_set;
     var sta = {};
     var output;
-    var node = this;
+
+    if (this.sm_config) {
+      sm = JSON.parse(this.sm_config);
+      set_dsm(sm);
+      context.set('sm', sm);
+      this.status({fill:sta.fill,shape:"dot",text:sta.text});
+      sm_set = true;
+    }
     
     this.on('input', function(msg) {
-      var context = this.context();
       output = false;
       
       if (typeof context.keys()[0] === "undefined") {
-        sta = {fill:"red", text:"dsm undefined"};
+        sm_set = false;
       } else {
         sm = context.get('sm');
-        sta = {fill:"green", text:"dsm set"};
+        sm_set = true;
       }
       
       switch (msg.topic) {
         case "set":
-          if (typeof msg.payload === "object") {
-            set_dsm(msg);
-          } else {
+          if (typeof msg.payload !== "object") {
             sta = {fill:"red", text:"invalid payload, not an object"};
+          } else {
+            sm = msg.payload;
+            set_dsm(sm);
+            if(sm.states) {
+              const stateOutput = sm.stateOutput || "topic";
+              RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
+            }
+            if (typeof sm.methods !== "undefined" && sm.methods.set) {
+              process_method(msg, sm, "set");
+            }
           }
           break;
         default:
-          if (sta.text === "dsm set") {
+          if (!sm_set) {
+            sta = {fill:"red", text:"dsm undefined"};
+          } else {
             const triggerInput = sm.triggerInput || "topic";
             const method = RED.util.getMessageProperty(msg,triggerInput);
+            
             if (sm.states) {
-              msg = process_tran(msg);
+              process_tran(msg, sm);
             } else {
               sta = {fill:"yellow", text:"no states"}; 
             }
             
             if (typeof sm.methods !== "undefined") {
-              output = true;
-              msg = process_method(msg, method);
+              if (sm.methods[method]) {
+                process_method(msg, sm, method);
+              }
+              /* experimental
+              if (sm.methods[sm.currentState]) {
+                 process_method(msg, sm, sm.currentState);
+              }
+              */
             }
           }
       }
@@ -48,13 +81,13 @@ module.exports = function(RED) {
       const globalOutput = sm.globalOutput || false;
       const flowOutput = sm.flowOutput || false;
       if (globalOutput) {
-        this.context().global.set(globalOutput, sm.currentState);
+        global.set(globalOutput, sm.currentState);
       }
       if (flowOutput) {
-        this.context().flow.set(flowOutput, sm.currentState);
+        flow.set(flowOutput, sm.currentState);
       }
       context.set('sm', sm);
-      this.status({fill:sta.fill,shape:"dot",text:sta.text});
+      node.status({fill:sta.fill,shape:"dot",text:sta.text});
       
       if (output) {
         if (sm.data) {
@@ -64,15 +97,10 @@ module.exports = function(RED) {
       }
     });
     
-    function set_dsm(msg) {
+    function set_dsm(sm) {
       var trans = [];
-      const stateOutput = sm.stateOutput || "topic";
       
-      sm = msg.payload;
-      
-      if(sm.states) {
-        output = true;
-        RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
+      if (sm.states) {
         Object.keys(sm.states).forEach(function(key) {
           Object.keys(sm.states[key]).forEach(function(s) {
             if (trans.indexOf(s) < 0) trans.push(s);
@@ -83,13 +111,9 @@ module.exports = function(RED) {
       } else {
         sta = {fill:"yellow", text:"no states"}; 
       }
-      
-      if (typeof sm.methods !== "undefined") {
-        msg = process_method(msg, "set");
-      }
     }
     
-    function process_tran(msg) {
+    function process_tran(msg, sm) {
       const triggerInput = sm.triggerInput || "topic";
       const stateOutput = sm.stateOutput || "topic";
       const state = sm.currentState;
@@ -112,65 +136,58 @@ module.exports = function(RED) {
           }
         }
       }
-      return (msg);
     }
     
-    function process_method(msg, method) {
+    function process_method(msg, sm, method) {
       var stmnt = sm.methods[method];
-
-      if (!stmnt) {
-        output = false;
-        sta = {fill:"red", text: method+ " undefined"};
+      output = true;
+      
+      sta.text += " - "+method;
+      output = true;
+      
+      if (typeof stmnt === "string") {
+        eval(sm.methods[method]);
       } else {
-        sta.text += " - "+method;
-        
-        if (typeof stmnt === "string") {
-          eval(sm.methods[method]);
+        var param;
+        if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
+          param = sm.data[stmnt.param];
         } else {
-          var param;
-          if (typeof sm.data[stmnt.param] !== "undefined") {
-            param = sm.data[stmnt.param];
-          } else {
-            param = Number(stmnt.param);
-          }
-          switch (stmnt.name) {
-            case "setData":
-              const triggerInput = sm.triggerInput || "topic";
-              const name = RED.util.getMessageProperty(msg,triggerInput);
-              sm.data[name] = msg.payload; output = false;
-              break;
-            case "getData":
-              msg.payload = sm.data;
-              break;
-            case "timer":
-              setTimeout(function() {
-                node.send(msg)}, param);
-              output = false;
-              sta.text += ", "+param;
-              break;
-            case "watchdog":
-              if (!sm.timeout) {
-                sm.timeout = {};
-              }
-              if (sm.timeout[method]) {
-                 clearTimeout(sm.timeout[method]);
-              }
+          param = Number(stmnt.param);
+        }
+        
+        switch (stmnt.name) {
+          case "setData":
+            const triggerInput = sm.triggerInput || "topic";
+            const name = RED.util.getMessageProperty(msg,triggerInput);
+            sm.data[name] = msg.payload;
+            output = false;
+            break;
+          case "getData":
+            msg.payload = sm.data;
+            break;
+          case "timer":
+            setTimeout(function() {
+              node.send(msg)}, param);
+            sta.text += ", "+param;
+            output = false;
+            break;
+          case "watchdog":
+            if (!sm.timeout) {
+              sm.timeout = {};
+            }
+            if (sm.timeout[method]) {
+               clearTimeout(sm.timeout[method]);
+            }
+            
+            sm.timeout[method] = setTimeout(function() {
+              node.send(msg)}, param);
               
-              sm.timeout[method] = setTimeout(function() {
-                node.send(msg)}, param);
-                
-              output = false;
-              sta.text += ", "+param;
-              break;
-            default:
-              output = false;
-              sta = {fill:"red", text: method+ " undefined"};
-          }
+            sta.text += ", "+param;
+            output = false;
+            break;
         }
       }
-      return (msg);
     }
-    
   }
   RED.nodes.registerType("dsm",DsmNode);
 };
