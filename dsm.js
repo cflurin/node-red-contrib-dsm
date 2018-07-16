@@ -69,6 +69,9 @@ module.exports = function(RED) {
               if (sm.methods[method]) {
                 process_method(msg, sm, method);
               }
+              if (sm.methods.onTransition) {
+                process_method(msg, sm, "onTransition");
+              }
               /* experimental
               if (sm.methods[sm.currentState]) {
                  process_method(msg, sm, sm.currentState);

@@ -77,6 +77,10 @@ Example:
 ```
 Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
 
+### General purpose methods
+
+`onTransition`: this method is executed by every transition.
+
 ### Build-in methods
 
 To simplify the configuration build-in methods are available.
