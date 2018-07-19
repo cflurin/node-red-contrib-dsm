@@ -89,7 +89,13 @@ Methods can be any valid javascript statements. If the method name is the same a
 }
     "methods": {
         "onTransition": "msg.payload = {'sid': global.get('xiaomi_name')[msg.payload]};",
-        "status": "{fill:'green', shape:'ring',text:JSON.stringify(msg.payload)};"
+        "status": {
+            "fill": "green",
+            "shape": "ring",
+            "text": {
+                "get": "JSON.stringify(msg.payload)"
+            }
+        }
     }
 }
 ```

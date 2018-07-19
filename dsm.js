@@ -73,7 +73,7 @@ module.exports = function(RED) {
                 process_method(msg, sm, "onTransition");
               }
               if (sm.methods.status) {
-                eval("sta="+sm.methods.status);
+                process_status(msg, sm, sm.methods.status);
               }
               /* experimental
               if (sm.methods[sm.currentState]) {
@@ -191,6 +191,22 @@ module.exports = function(RED) {
             sta.text += ", "+param;
             output = false;
             break;
+        }
+      }
+    }
+    
+    function process_status(msg, sm, status) {     
+      if (status.fill) {
+        sta.fill = status.fill;
+      }
+      if(status.shape) {
+        sta.shape = status.shape;
+      }
+      if(status.text) {
+        if (typeof status.text === "string") {
+          sta.text = status.text;
+        } else {
+          sta.text = eval(status.text.get);
         }
       }
     }
