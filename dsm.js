@@ -15,14 +15,14 @@ module.exports = function(RED) {
     
     var sm = this.sm;
     var sm_set = this.sm_set;
-    var sta = {};
+    var sta = {fill:"grey",shape:"dot",text:"init"};
     var output;
 
     if (this.sm_config) {
       sm = JSON.parse(this.sm_config);
       set_dsm(sm);
       context.set('sm', sm);
-      this.status({fill:sta.fill,shape:"dot",text:sta.text});
+      this.status({fill:sta.fill,shape:sta.shape,text:sta.text});
       sm_set = true;
     }
     
@@ -72,6 +72,9 @@ module.exports = function(RED) {
               if (sm.methods.onTransition) {
                 process_method(msg, sm, "onTransition");
               }
+              if (sm.methods.status) {
+                eval("sta="+sm.methods.status);
+              }
               /* experimental
               if (sm.methods[sm.currentState]) {
                  process_method(msg, sm, sm.currentState);
@@ -90,7 +93,7 @@ module.exports = function(RED) {
         flow.set(flowOutput, sm.currentState);
       }
       context.set('sm', sm);
-      node.status({fill:sta.fill,shape:"dot",text:sta.text});
+      node.status({fill:sta.fill,shape:sta.shape,text:sta.text});
       
       if (output) {
         if (sm.data) {
@@ -149,7 +152,7 @@ module.exports = function(RED) {
       output = true;
       
       if (typeof stmnt === "string") {
-        eval(sm.methods[method]);
+        eval(stmnt);
       } else {
         var param;
         if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
@@ -191,6 +194,7 @@ module.exports = function(RED) {
         }
       }
     }
+    
   }
   RED.nodes.registerType("dsm",DsmNode);
 };

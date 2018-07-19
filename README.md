@@ -57,7 +57,8 @@ payload: any
 ### Data and methods
 
 In addition to states and transitions a `dsm` can also contain arbitrary data and methods.
-Example:
+
+#### Example:
 
 ```
 {
@@ -79,7 +80,20 @@ Methods can be any valid javascript statements. If the method name is the same a
 
 ### General purpose methods
 
-`onTransition`: this method is executed by every transition.
+* `onTransition` this method is executed by every transition.
+* `status` defines an arbitrary status
+
+#### Example:
+
+```
+}
+    "methods": {
+        "onTransition": "msg.payload = {'sid': global.get('xiaomi_name')[msg.payload]};",
+        "status": "{fill:'green', shape:'ring',text:JSON.stringify(msg.payload)};"
+    }
+}
+```
+
 
 ### Build-in methods
 
