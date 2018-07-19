@@ -132,15 +132,19 @@ module.exports = function(RED) {
           output = true;
           sm.currentState = sm.states[state][tran];
           RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
+          //sta = {fill:"green", text:sm.currentState};
+        }
+        /* else {
           sta = {fill:"green", text:sm.currentState};
-        } else {
+
           sta.fill = "yellow";
           if(sm.trans.indexOf(tran) > -1) {
               sta.text = state+" unchanged";
           } else {
               sta.text = tran+" rejected";
           }
-        }
+        }*/
+        sta = {fill:"green", text:sm.currentState};
       }
     }
     
@@ -148,7 +152,7 @@ module.exports = function(RED) {
       var stmnt = sm.methods[method];
       output = true;
       
-      sta.text += " - "+method;
+      //sta.text += " - "+method;
       output = true;
       
       if (typeof stmnt === "string") {
@@ -174,7 +178,7 @@ module.exports = function(RED) {
           case "timer":
             setTimeout(function() {
               node.send(msg)}, param);
-            sta.text += ", "+param;
+            //sta.text += ", "+param;
             output = false;
             break;
           case "watchdog":
@@ -188,7 +192,7 @@ module.exports = function(RED) {
             sm.timeout[method] = setTimeout(function() {
               node.send(msg)}, param);
               
-            sta.text += ", "+param;
+            //sta.text += ", "+param;
             output = false;
             break;
         }
