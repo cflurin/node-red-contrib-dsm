@@ -29,20 +29,21 @@ module.exports = function(RED) {
     this.on('input', function(msg) {
       output = false;
       
-      if (typeof context.keys()[0] === "undefined") {
+      sm = context.get('sm');
+      if (typeof sm === "undefined") {
         sm_set = false;
       } else {
-        sm = context.get('sm');
         sm_set = true;
       }
       
       switch (msg.topic) {
         case "set":
           if (typeof msg.payload !== "object") {
-            sta = {fill:"red", text:"invalid payload, not an object"};
+            sta = {fill:"red",shape:"ring",text:"invalid payload, not an object"};
           } else {
             sm = msg.payload;
             set_dsm(sm);
+            sm_set = true;
             if(sm.states) {
               const stateOutput = sm.stateOutput || "topic";
               RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
@@ -54,7 +55,7 @@ module.exports = function(RED) {
           break;
         default:
           if (!sm_set) {
-            sta = {fill:"red", text:"dsm undefined"};
+            sta = {fill:"red",shape:"ring",text:"dsm undefined"};
           } else {
             const triggerInput = sm.triggerInput || "topic";
             const method = RED.util.getMessageProperty(msg,triggerInput);
@@ -62,7 +63,7 @@ module.exports = function(RED) {
             if (sm.states) {
               process_tran(msg, sm);
             } else {
-              sta = {fill:"yellow", text:"no states"}; 
+              sta = {fill:"yellow",shape:"ring",text:"no states"}; 
             }
             
             if (typeof sm.methods !== "undefined") {
@@ -84,15 +85,18 @@ module.exports = function(RED) {
           }
       }
       
-      const globalOutput = sm.globalOutput || false;
-      const flowOutput = sm.flowOutput || false;
-      if (globalOutput) {
-        global.set(globalOutput, sm.currentState);
+      if(sm_set) {
+        const globalOutput = sm.globalOutput || false;
+        const flowOutput = sm.flowOutput || false;
+        if (globalOutput) {
+          global.set(globalOutput, sm.currentState);
+        }
+        if (flowOutput) {
+          flow.set(flowOutput, sm.currentState);
+        }
+        context.set('sm', sm);
       }
-      if (flowOutput) {
-        flow.set(flowOutput, sm.currentState);
-      }
-      context.set('sm', sm);
+      
       node.status({fill:sta.fill,shape:sta.shape,text:sta.text});
       
       if (output) {
@@ -113,9 +117,9 @@ module.exports = function(RED) {
           });
         });
         sm.trans = trans;
-        sta = {fill:"green", text:sm.currentState};
+        sta = {fill:"green",shape:"dot",text:sm.currentState};
       } else {
-        sta = {fill:"yellow", text:"no states"}; 
+        sta = {fill:"yellow",shape:"ring",text:"no states"};
       }
     }
     
@@ -126,33 +130,25 @@ module.exports = function(RED) {
       const tran = RED.util.getMessageProperty(msg,triggerInput);
       
       if (typeof sm.states[state] === "undefined") {
-        sta = {fill:"red", text:state+" undefined"};
+        sta = {fill:"red",shape:"ring",text:state+" undefined"};
       } else {
         if (sm.states[state][tran]) {
           output = true;
           sm.currentState = sm.states[state][tran];
           RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
-          //sta = {fill:"green", text:sm.currentState};
-        }
-        /* else {
-          sta = {fill:"green", text:sm.currentState};
-
-          sta.fill = "yellow";
+          sta = {fill:"green",shape:"dot",text:sm.currentState};
+        } else {
           if(sm.trans.indexOf(tran) > -1) {
-              sta.text = state+" unchanged";
+            sta = {fill:"green",shape:"dot",text:sm.currentState};
           } else {
-              sta.text = tran+" rejected";
+            sta = {fill:"yellow",shape:"ring",text:tran+" undefined"};
           }
-        }*/
-        sta = {fill:"green", text:sm.currentState};
+        }
       }
     }
     
     function process_method(msg, sm, method) {
       var stmnt = sm.methods[method];
-      output = true;
-      
-      //sta.text += " - "+method;
       output = true;
       
       if (typeof stmnt === "string") {
@@ -178,7 +174,6 @@ module.exports = function(RED) {
           case "timer":
             setTimeout(function() {
               node.send(msg)}, param);
-            //sta.text += ", "+param;
             output = false;
             break;
           case "watchdog":
@@ -192,7 +187,6 @@ module.exports = function(RED) {
             sm.timeout[method] = setTimeout(function() {
               node.send(msg)}, param);
               
-            //sta.text += ", "+param;
             output = false;
             break;
         }
