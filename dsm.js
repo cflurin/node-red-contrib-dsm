@@ -169,6 +169,7 @@ module.exports = function(RED) {
             break;
           case "getData":
             msg.payload = sm.data;
+            output = true;
             break;
           case "timer":
             setTimeout(function() {
