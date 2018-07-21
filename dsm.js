@@ -149,7 +149,6 @@ module.exports = function(RED) {
     
     function process_method(msg, sm, method) {
       var stmnt = sm.methods[method];
-      output = true;
       
       if (typeof stmnt === "string") {
         eval(stmnt);
