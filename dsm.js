@@ -60,6 +60,12 @@ module.exports = function(RED) {
             const triggerInput = sm.triggerInput || "topic";
             const method = RED.util.getMessageProperty(msg,triggerInput);
             
+            if (typeof sm.methods !== "undefined") {
+                if (sm.methods.onBeforeTransition) {
+                    process_method(msg, sm, "onBeforeTransition");
+                }
+            }
+            
             if (sm.states) {
               process_tran(msg, sm);
             } else {
@@ -72,6 +78,9 @@ module.exports = function(RED) {
               }
               if (sm.methods.onTransition) {
                 process_method(msg, sm, "onTransition");
+              }
+              if (sm.methods.onAfterTransition) {
+                process_method(msg, sm, "onAfterTransition");
               }
               if (sm.methods.status) {
                 process_status(msg, sm, sm.methods.status);

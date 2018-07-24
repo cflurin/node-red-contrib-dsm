@@ -80,8 +80,12 @@ Methods can be any valid javascript statements. If the method name is the same a
 
 ### General purpose methods
 
-* `onTransition` this method is executed by every transition.
+* `onBeforeTransition`
+* `onTransition` 
+* `onAfterTransition` 
 * `status` defines an arbitrary status
+
+The general purpose methods are executed independently even without states.
 
 #### Example:
 
