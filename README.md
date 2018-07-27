@@ -89,7 +89,7 @@ To simplify editing methods can be defined as an array of comma separated string
     "} else {",
         "msg.payload = 'indoor = outdoor';",
     "}"
-],
+]
 ```
 
 ### General purpose methods
