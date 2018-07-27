@@ -78,7 +78,7 @@ In addition to states and transitions a `dsm` can also contain arbitrary data an
 ```
 Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
 
-To simplify editing methods can be defined as an array of comma separated strings:`
+To simplify editing methods can be defined as an array of comma separated strings:
 
 ```
 "onTransition" : [
