@@ -78,6 +78,20 @@ In addition to states and transitions a `dsm` can also contain arbitrary data an
 ```
 Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
 
+To simplify editing methods can be defined as an array of comma separated strings:`
+
+```
+"onTransition" : [
+    "if (sm.data.indoor > sm.data.outdoor) {",
+        "msg.payload = 'indoor > outdoor';",
+    "} else if (sm.data.indoor < sm.data.outdoor) {",
+        "msg.payload = 'indoor < outdoor';",
+    "} else {",
+        "msg.payload = 'indoor = outdoor';",
+    "}"
+],
+```
+
 ### General purpose methods
 
 * `onBeforeTransition`

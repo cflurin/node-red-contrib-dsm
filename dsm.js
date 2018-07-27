@@ -162,6 +162,10 @@ module.exports = function(RED) {
       if (typeof stmnt === "string") {
         eval(stmnt);
       } else {
+        if (Array.isArray(stmnt)) {
+          eval(stmnt.join(''));
+        }
+          
         var param;
         if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
           param = sm.data[stmnt.param];
