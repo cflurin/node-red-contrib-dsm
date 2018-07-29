@@ -170,7 +170,7 @@ module.exports = function(RED) {
         if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
           param = sm.data[stmnt.param];
         } else {
-          param = Number(stmnt.param);
+          param = stmnt.param;
         }
         
         switch (stmnt.name) {
@@ -185,16 +185,24 @@ module.exports = function(RED) {
             output = true;
             break;
           case "timer":
-            setTimeout(function() {
+            if (!sm.timeout) {
+              sm.timeout = {};
+            }
+            sm.timeout[method] = setTimeout(function() {
               node.send(msg)}, param);
             output = false;
+            break;
+          case "resetTimer":
+            if (sm.timeout && sm.timeout[param]) {
+              clearTimeout(sm.timeout[param]);
+            }
             break;
           case "watchdog":
             if (!sm.timeout) {
               sm.timeout = {};
             }
             if (sm.timeout[method]) {
-               clearTimeout(sm.timeout[method]);
+              clearTimeout(sm.timeout[method]);
             }
             
             sm.timeout[method] = setTimeout(function() {

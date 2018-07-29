@@ -126,6 +126,7 @@ To simplify the configuration build-in methods are available.
 * setData
 * getData
 * timer
+* resetTimer
 * watchdog
 
 ### Configuration Examples
@@ -182,6 +183,10 @@ To simplify the configuration build-in methods are available.
         "timer3": {
             "name": "timer",
             "param": 5000
+        },
+        "resetTimer3": {
+            "name": "resetTimer",
+            "param": "timer3"
         },
         "watchdog1": {
             "name": "watchdog",
