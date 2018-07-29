@@ -214,18 +214,46 @@ module.exports = function(RED) {
       }
     }
     
-    function process_status(msg, sm, status) {     
+    function process_status(msg, sm, status) {
       if (status.fill) {
-        sta.fill = status.fill;
+        if (typeof status.fill === "string") {
+          sta.fill = status.fill;
+        } else {
+          if (typeof status.fill.get ===  "string") {
+            sta.fill = eval(status.fill.get);
+          } else {
+            if (Array.isArray(status.fill.get)) {
+              sta.fill = eval(status.fill.get.join(''));
+            }    
+          }
+        }
+      }  
+      
+      if (status.shape) {
+        if (typeof status.shape === "string") {
+          sta.shape = status.shape;
+        } else {
+          if (typeof status.shape.get ===  "string") {
+            sta.shape = eval(status.shape.get);
+          } else {
+            if (Array.isArray(status.shape.get)) {
+              sta.shape = eval(status.shape.get.join(''));
+            }    
+          }
+        }
       }
-      if(status.shape) {
-        sta.shape = status.shape;
-      }
-      if(status.text) {
+      
+      if (status.text) {
         if (typeof status.text === "string") {
           sta.text = status.text;
         } else {
-          sta.text = eval(status.text.get);
+          if (typeof status.text.get ===  "string") {
+            sta.text = eval(status.text.get);
+          } else {
+            if (Array.isArray(status.text.get)) {
+              sta.text = eval(status.text.get.join(''));
+            }    
+          }
         }
       }
     }
