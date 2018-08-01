@@ -15,16 +15,17 @@ module.exports = function(RED) {
     
     var sm = this.sm;
     var sm_set = this.sm_set;
-    var sta = {fill:"grey",shape:"dot",text:"init"};
+    var sta = {fill:"grey",shape:"dot",text:"dsm undefined"};
     var output;
 
     if (this.sm_config) {
       sm = JSON.parse(this.sm_config);
       set_dsm(sm);
       context.set('sm', sm);
-      this.status({fill:sta.fill,shape:sta.shape,text:sta.text});
       sm_set = true;
     }
+    
+    node.status(sta);
     
     this.on('input', function(msg) {
       output = false;
@@ -67,9 +68,7 @@ module.exports = function(RED) {
             }
             
             if (sm.states) {
-              process_tran(msg, sm);
-            } else {
-              sta = {fill:"yellow",shape:"ring",text:"no states"}; 
+              process_tran(msg, sm, method); 
             }
             
             if (typeof sm.methods !== "undefined") {
@@ -106,7 +105,7 @@ module.exports = function(RED) {
         context.set('sm', sm);
       }
       
-      node.status({fill:sta.fill,shape:sta.shape,text:sta.text});
+      node.status(sta);
       
       if (output) {
         if (sm.data) {
@@ -126,13 +125,11 @@ module.exports = function(RED) {
           });
         });
         sm.trans = trans;
-        sta = {fill:"green",shape:"dot",text:sm.currentState};
-      } else {
-        sta = {fill:"yellow",shape:"ring",text:"no states"};
       }
+      sta = {fill:"grey",shape:"dot",text:"dsm ready"};
     }
     
-    function process_tran(msg, sm) {
+    function process_tran(msg, sm, method) {
       const triggerInput = sm.triggerInput || "topic";
       const stateOutput = sm.stateOutput || "topic";
       const state = sm.currentState;
@@ -150,7 +147,9 @@ module.exports = function(RED) {
           if(sm.trans.indexOf(tran) > -1) {
             sta = {fill:"green",shape:"dot",text:sm.currentState};
           } else {
-            sta = {fill:"yellow",shape:"ring",text:tran+" undefined"};
+            if (sm.methods && !sm.methods[method]) {
+              sta = {fill:"yellow",shape:"ring",text:tran+" undefined"};
+            }
           }
         }
       }
@@ -164,96 +163,100 @@ module.exports = function(RED) {
       } else {
         if (Array.isArray(stmnt)) {
           eval(stmnt.join(''));
-        }
+        } else { // build in methods
+          var param;
+          if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
+            param = sm.data[stmnt.param];
+          } else {
+            param = stmnt.param;
+          }
           
-        var param;
-        if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
-          param = sm.data[stmnt.param];
-        } else {
-          param = stmnt.param;
-        }
-        
-        switch (stmnt.name) {
-          case "setData":
-            const triggerInput = sm.triggerInput || "topic";
-            const name = RED.util.getMessageProperty(msg,triggerInput);
-            sm.data[name] = msg.payload;
-            output = false;
-            break;
-          case "getData":
-            msg.payload = sm.data;
-            output = true;
-            break;
-          case "timer":
-            if (!sm.timeout) {
-              sm.timeout = {};
-            }
-            sm.timeout[method] = setTimeout(function() {
-              node.send(msg)}, param);
-            output = false;
-            break;
-          case "resetTimer":
-            if (sm.timeout && sm.timeout[param]) {
-              clearTimeout(sm.timeout[param]);
-            }
-            break;
-          case "watchdog":
-            if (!sm.timeout) {
-              sm.timeout = {};
-            }
-            if (sm.timeout[method]) {
-              clearTimeout(sm.timeout[method]);
-            }
-            
-            sm.timeout[method] = setTimeout(function() {
-              node.send(msg)}, param);
-              
-            output = false;
-            break;
+          switch (stmnt.name) {
+            case "setData":
+              const triggerInput = sm.triggerInput || "topic";
+              const name = RED.util.getMessageProperty(msg,triggerInput);
+              sm.data[name] = msg.payload;
+              output = false;
+              break;
+            case "getData":
+              msg.payload = sm.data;
+              output = true;
+              break;
+            case "timer":
+              process_timer(msg, sm, method, stmnt, param);
+              break;
+            case "resetTimer":
+              if (sm.timeout && sm.timeout[param]) {
+                clearTimeout(sm.timeout[param]);
+              }
+              break;
+            case "watchdog":
+              if (!sm.timeout) {
+                sm.timeout = {};
+              }
+              if (sm.timeout[method]) {
+                clearTimeout(sm.timeout[method]);
+              }
+              sm.timeout[method] = setTimeout(function() {
+                node.send(msg)
+              }, param);
+                
+              output = false;
+              break;
+          }
         }
       }
     }
     
-    function process_status(msg, sm, status) {
-      if (status.fill) {
-        if (typeof status.fill === "string") {
-          sta.fill = status.fill;
+    function process_timer(msg, sm, method, stmnt, param) {     
+      if (!sm.send) sm.send = {}; 
+      if (stmnt.send) {
+        if (typeof stmnt.send === "string") {
+          sm.send[method] = stmnt.send;
         } else {
-          if (typeof status.fill.get ===  "string") {
-            sta.fill = eval(status.fill.get);
+          if (typeof stmnt.send.get == "string") {
+            sm.send[method] = eval(stmnt.send.get);
           } else {
-            if (Array.isArray(status.fill.get)) {
-              sta.fill = eval(status.fill.get.join(''));
-            }    
-          }
-        }
-      }  
-      
-      if (status.shape) {
-        if (typeof status.shape === "string") {
-          sta.shape = status.shape;
-        } else {
-          if (typeof status.shape.get ===  "string") {
-            sta.shape = eval(status.shape.get);
-          } else {
-            if (Array.isArray(status.shape.get)) {
-              sta.shape = eval(status.shape.get.join(''));
-            }    
+            if (Array.isArray(sm.send.get)) {
+              sm.send[method] = eval(stmnt.send.get.join(''));
+            }
           }
         }
       }
       
+      if (!sm.timeout) sm.timeout = {};
+      sm.timeout[method] = setTimeout(function() {
+        if (sm.send[method]) {
+            msg.payload = sm.send[method];
+        }
+        node.send(msg)
+      }, param);
+        
+      output = false;
+    }
+
+    function process_status(msg, sm, status) {
+      if (status.fill) {
+        process_property(msg, sm, status, 'fill');
+      }        
+      if (status.shape) {
+        process_property(msg, sm, status, 'shape');
+      }
       if (status.text) {
-        if (typeof status.text === "string") {
-          sta.text = status.text;
+        process_property(msg, sm, status, 'text');
+      }
+    }
+    
+    function process_property(msg, sm, status, prop) {
+      if (typeof status[prop] === "string") {
+        sta[prop] = status[prop];
+      } else {
+        if (typeof status[prop].get ===  "string") {
+          sta[prop] = eval(status[prop].get);
         } else {
-          if (typeof status.text.get ===  "string") {
-            sta.text = eval(status.text.get);
-          } else {
-            if (Array.isArray(status.text.get)) {
-              sta.text = eval(status.text.get.join(''));
-            }    
-          }
+          if (Array.isArray(status[prop].get)) {
+            sta[prop] = eval(status[prop].get.join(''));
+          }    
         }
       }
     }
