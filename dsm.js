@@ -58,14 +58,15 @@ module.exports = function(RED) {
           if (!sm_set) {
             sta = {fill:"red",shape:"ring",text:"dsm undefined"};
           } else {
-            const triggerInput = sm.triggerInput || "topic";
-            const method = RED.util.getMessageProperty(msg,triggerInput);
             
             if (typeof sm.methods !== "undefined") {
                 if (sm.methods.onBeforeTransition) {
                     process_method(msg, sm, "onBeforeTransition");
                 }
             }
+            
+            const triggerInput = sm.triggerInput || "topic";
+            const method = RED.util.getMessageProperty(msg,triggerInput);
             
             if (sm.states) {
               process_tran(msg, sm, method); 
@@ -160,50 +161,48 @@ module.exports = function(RED) {
       
       if (typeof stmnt === "string") {
         eval(stmnt);
-      } else {
-        if (Array.isArray(stmnt)) {
+      } else if (Array.isArray(stmnt)) {
           eval(stmnt.join(''));
-        } else { // build in methods
-          var param;
-          if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
-            param = sm.data[stmnt.param];
-          } else {
-            param = stmnt.param;
-          }
-          
-          switch (stmnt.name) {
-            case "setData":
-              const triggerInput = sm.triggerInput || "topic";
-              const name = RED.util.getMessageProperty(msg,triggerInput);
-              sm.data[name] = msg.payload;
-              output = false;
-              break;
-            case "getData":
-              msg.payload = sm.data;
-              output = true;
-              break;
-            case "timer":
-              process_timer(msg, sm, method, stmnt, param);
-              break;
-            case "resetTimer":
-              if (sm.timeout && sm.timeout[param]) {
-                clearTimeout(sm.timeout[param]);
-              }
-              break;
-            case "watchdog":
-              if (!sm.timeout) {
-                sm.timeout = {};
-              }
-              if (sm.timeout[method]) {
-                clearTimeout(sm.timeout[method]);
-              }
-              sm.timeout[method] = setTimeout(function() {
-                node.send(msg)
-              }, param);
-                
-              output = false;
-              break;
-          }
+      } else { // build in methods
+        var param;
+        if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
+          param = sm.data[stmnt.param];
+        } else {
+          param = stmnt.param;
+        }
+        
+        switch (stmnt.name) {
+          case "setData":
+            const triggerInput = sm.triggerInput || "topic";
+            const name = RED.util.getMessageProperty(msg,triggerInput);
+            sm.data[name] = msg.payload;
+            output = false;
+            break;
+          case "getData":
+            msg.payload = sm.data;
+            output = true;
+            break;
+          case "timer":
+            process_timer(msg, sm, method, stmnt, param);
+            break;
+          case "resetTimer":
+            if (sm.timeout && sm.timeout[param]) {
+              clearTimeout(sm.timeout[param]);
+            }
+            break;
+          case "watchdog":
+            if (!sm.timeout) {
+              sm.timeout = {};
+            }
+            if (sm.timeout[method]) {
+              clearTimeout(sm.timeout[method]);
+            }
+            sm.timeout[method] = setTimeout(function() {
+              node.send(msg)
+            }, param);
+              
+            output = false;
+            break;
         }
       }
     }
