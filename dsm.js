@@ -58,7 +58,6 @@ module.exports = function(RED) {
           if (!sm_set) {
             sta = {fill:"red",shape:"ring",text:"dsm undefined"};
           } else {
-            
             if (typeof sm.methods !== "undefined") {
                 if (sm.methods.onBeforeTransition) {
                     process_method(msg, sm, "onBeforeTransition");
@@ -191,17 +190,7 @@ module.exports = function(RED) {
             }
             break;
           case "watchdog":
-            if (!sm.timeout) {
-              sm.timeout = {};
-            }
-            if (sm.timeout[method]) {
-              clearTimeout(sm.timeout[method]);
-            }
-            sm.timeout[method] = setTimeout(function() {
-              node.send(msg)
-            }, param);
-              
-            output = false;
+            process_watchdog(msg, sm, method, stmnt, param);
             break;
         }
       }
@@ -228,7 +217,39 @@ module.exports = function(RED) {
         if (sm.send[method]) {
             msg.payload = sm.send[method];
         }
-        node.send(msg)
+        node.send(msg);
+      }, param);
+        
+      output = false;
+    }
+    
+    function process_watchdog(msg, sm, method, stmnt, param) {
+      if (!sm.send) sm.send = {}; 
+      if (stmnt.send) {
+        if (typeof stmnt.send === "string") {
+          sm.send[method] = stmnt.send;
+        } else {
+          if (typeof stmnt.send.get == "string") {
+            sm.send[method] = eval(stmnt.send.get);
+          } else {
+            if (Array.isArray(sm.send.get)) {
+              sm.send[method] = eval(stmnt.send.get.join(''));
+            }
+          }
+        }
+      }
+    
+      if (!sm.timeout) {
+        sm.timeout = {};
+      }
+      if (sm.timeout[method]) {
+        clearTimeout(sm.timeout[method]);
+      }
+      sm.timeout[method] = setTimeout(function() {
+        if (sm.send[method]) {
+            msg.payload = sm.send[method];
+        }
+        node.send(msg);
       }, param);
         
       output = false;

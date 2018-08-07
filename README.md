@@ -182,7 +182,8 @@ To simplify the configuration build-in methods are available.
         },
         "timer3": {
             "name": "timer",
-            "param": 5000
+            "param": 5000,
+            "send": "toilet window timeout"
         },
         "resetTimer3": {
             "name": "resetTimer",
@@ -190,7 +191,10 @@ To simplify the configuration build-in methods are available.
         },
         "watchdog1": {
             "name": "watchdog",
-            "param": 5000
+            "param": 5000,
+            "send": {
+                "get": "msg.payload.name+' timeout';"
+            }
         }
     }
 }
