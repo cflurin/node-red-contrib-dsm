@@ -114,7 +114,15 @@ module.exports = function(RED) {
         node.send(msg);
       }
     });
-    
+          
+    this.on('close', function() {
+      if (sm.timeout) {
+        for (var k in sm.timeout) {
+          clearTimeout(sm.timeout[k]);
+        }
+      }
+    });
+      
     function set_dsm(sm) {
       var trans = [];
       
