@@ -205,8 +205,8 @@ module.exports = function(RED) {
     }
     
     function process_timer(msg, sm, method, stmnt, param) {     
-      if (!sm.send) sm.send = {}; 
       if (stmnt.send) {
+        if (!sm.send) sm.send = {};
         if (typeof stmnt.send === "string") {
           sm.send[method] = stmnt.send;
         } else {
@@ -218,22 +218,39 @@ module.exports = function(RED) {
             }
           }
         }
+      } else if (stmnt.do) {
+        if (!sm.do) sm.do = {}; 
+        if (typeof stmnt.do === "string") {
+          sm.do[method] = stmnt.do;
+        } else {
+          if (typeof stmnt.do.get == "string") {
+            sm.do[method] = eval(stmnt.do.get);
+          } else {
+            if (Array.isArray(sm.send.get)) {
+              sm.do[method] = eval(stmnt.do.get.join(''));
+            }
+          }
+        }
       }
       
       if (!sm.timeout) sm.timeout = {};
       sm.timeout[method] = setTimeout(function() {
-        if (sm.send[method]) {
+        if (typeof sm.send !== "undefined" && sm.send[method]) {
             msg.payload = sm.send[method];
+            node.send(msg);
+        } else if (typeof sm.do !== "undefined" && sm.do[method]) {
+          eval(sm.do[method]);
+        } else {
+          node.send(msg);
         }
-        node.send(msg);
       }, param);
         
       output = false;
     }
     
     function process_watchdog(msg, sm, method, stmnt, param) {
-      if (!sm.send) sm.send = {}; 
       if (stmnt.send) {
+        if (!sm.send) sm.send = {};
         if (typeof stmnt.send === "string") {
           sm.send[method] = stmnt.send;
         } else {
@@ -242,6 +259,19 @@ module.exports = function(RED) {
           } else {
             if (Array.isArray(sm.send.get)) {
               sm.send[method] = eval(stmnt.send.get.join(''));
+            }
+          }
+        }
+      } else if (stmnt.do) {
+        if (!sm.do) sm.do = {}; 
+        if (typeof stmnt.do === "string") {
+          sm.do[method] = stmnt.do;
+        } else {
+          if (typeof stmnt.do.get == "string") {
+            sm.do[method] = eval(stmnt.do.get);
+          } else {
+            if (Array.isArray(sm.send.get)) {
+              sm.do[method] = eval(stmnt.do.get.join(''));
             }
           }
         }
@@ -254,10 +284,15 @@ module.exports = function(RED) {
         clearTimeout(sm.timeout[method]);
       }
       sm.timeout[method] = setTimeout(function() {
-        if (sm.send[method]) {
+        if (typeof sm.send !== "undefined" && sm.send[method]) {
             msg.payload = sm.send[method];
+            node.send(msg);
+        } else if (typeof sm.do !== "undefined" && sm.do[method]) {
+          eval(sm.do[method]);
+        } else {
+          node.send(msg);
         }
-        node.send(msg);
+        
       }, param);
         
       output = false;

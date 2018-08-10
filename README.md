@@ -178,7 +178,8 @@ To simplify the configuration build-in methods are available.
         },
         "timer2": {
             "name": "timer",
-            "param": "delay2"
+            "param": "delay2",
+            "do": "node.status({});"
         },
         "timer3": {
             "name": "timer",
@@ -199,7 +200,12 @@ To simplify the configuration build-in methods are available.
     }
 }
 ```
+
 `timer`and `watchdog` param in milliseconds.
+
+`do` executes a statement.
+
+`send` sets msg.payload - either to a string or when using `get` to the result of a statement - and send the msg.
 
 ##  Examples
 
