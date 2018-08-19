@@ -17,12 +17,20 @@ module.exports = function(RED) {
     var sm_set = this.sm_set;
     var sta = {fill:"grey",shape:"dot",text:"dsm undefined"};
     var output;
-
+    
     if (this.sm_config) {
       sm = JSON.parse(this.sm_config);
       set_dsm(sm);
       context.set('sm', sm);
       sm_set = true;
+    } else {
+      sm = context.get('sm');
+      if (typeof sm === "undefined") {
+        sm_set = false;
+      } else {
+        sm_set = true;
+        sta = {fill:"grey",shape:"dot",text:"dsm ready (contextStorage)"};
+      }
     }
     
     node.status(sta);

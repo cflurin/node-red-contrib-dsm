@@ -3,7 +3,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-        <div class="form-row" style="margin-bottom: 0px;">
+    <div class="form-row" style="margin-bottom: 0px;">
         <label for="node-input-sm_config" style="width: 100% !important;"><i class="fa fa-list"></i> Config</label>
         <input type="hidden" id="node-input-sm_config" autofocus="autofocus">
     </div>
@@ -88,9 +88,6 @@
         },
         inputLabels: "set|trigger|methods",
         outputLabels: "currentState|data",
-        sm_config: function() {
-            return (this.name?"# "+this.name+"\n":"")+(this.sm_config||"");
-        },
         oneditprepare: function() {
             var that = this;
             this.editor = RED.editor.createEditor({
