@@ -12,6 +12,8 @@ The `dsm` properties can be defined in the `edit dsm node` window or by an input
 
 ![dsmconf](https://user-images.githubusercontent.com/5056710/42732001-ca361a6e-8818-11e8-8b24-c121ddbda784.jpeg)
 
+**Version 0.10.0** and higher supports `contextStorage` which has been introduced with node-red version 0.19.0.
+
 #### JSON object:
 
 ```

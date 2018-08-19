@@ -29,7 +29,11 @@ module.exports = function(RED) {
         sm_set = false;
       } else {
         sm_set = true;
-        sta = {fill:"grey",shape:"dot",text:"dsm ready (contextStorage)"};
+        if (typeof sm.currentState !== "undefined") {
+          sta = {fill:"green",shape:"dot",text:sm.currentState};
+        } else {
+          sta = {fill:"grey",shape:"dot",text:"dsm ready (contextStorage)"};
+        }
       }
     }
     
