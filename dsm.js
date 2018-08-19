@@ -128,7 +128,7 @@ module.exports = function(RED) {
     });
           
     this.on('close', function() {
-      if (sm.timeout) {
+      if (typeof sm !== "undefined" && sm.timeout) {
         for (var k in sm.timeout) {
           clearTimeout(sm.timeout[k]);
         }
