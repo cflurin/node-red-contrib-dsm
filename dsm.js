@@ -184,7 +184,7 @@ module.exports = function(RED) {
           eval(stmnt.join(''));
       } else { // build in methods
         var param;
-        if (typeof(sm.data) !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
+        if (typeof sm.data !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
           param = sm.data[stmnt.param];
         } else {
           param = stmnt.param;
@@ -239,7 +239,12 @@ module.exports = function(RED) {
         }
       }
       
-      if (!sm.timeout) sm.timeout = {};
+      if (!sm.timeout) {
+        sm.timeout = {};
+      }
+      if (sm.timeout[method]) {
+        clearTimeout(sm.timeout[method]);
+      }
       sm.timeout[method] = setTimeout(function() {
         if (typeof sm.send !== "undefined" && sm.send[method]) {
           msg.payload = sm.send[method];
@@ -249,6 +254,8 @@ module.exports = function(RED) {
         } else {
           node.send(msg);
         }
+        clearTimeout(sm.timeout[method]);
+        sm.timeout[method] = null;
       }, param);
         
       output = false;
@@ -292,7 +299,8 @@ module.exports = function(RED) {
         } else {
           node.send(msg);
         }
-        
+        clearTimeout(sm.timeout[method]);
+        sm.timeout[method] = null;
       }, param);
         
       output = false;
