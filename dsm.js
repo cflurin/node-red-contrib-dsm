@@ -7,6 +7,7 @@ module.exports = function(RED) {
     this.sm_config = n.sm_config;   
     this.sm_set;
     this.sm = {};
+    this.timeout = {};
     
     var node = this;
     var context = this.context();
@@ -14,6 +15,7 @@ module.exports = function(RED) {
     var flow = this.context().flow;
     
     var sm = this.sm;
+    var timeout = this.timeout;
     var sm_set = this.sm_set;
     var sta = {fill:"grey",shape:"dot",text:"dsm undefined"};
     var output;
@@ -43,6 +45,7 @@ module.exports = function(RED) {
       output = false;
       
       sm = context.get('sm');
+      var sm_on_input = RED.util.cloneMessage(sm);
       if (typeof sm === "undefined") {
         sm_set = false;
       } else {
@@ -114,7 +117,9 @@ module.exports = function(RED) {
         if (flowOutput) {
           flow.set(flowOutput, sm.currentState);
         }
-        context.set('sm', sm);
+        if (!RED.util.compareObjects(sm, sm_on_input)) {
+          context.set('sm', sm);
+        }
       }
       
       node.status(sta);
@@ -128,9 +133,9 @@ module.exports = function(RED) {
     });
           
     this.on('close', function() {
-      if (typeof sm !== "undefined" && sm.timeout) {
-        for (var k in sm.timeout) {
-          clearTimeout(sm.timeout[k]);
+      if (Object.keys(timeout).length > 0) {
+        for (var k in timeout) {
+          clearTimeout(timeout[k]);
         }
       }
     });
@@ -205,8 +210,8 @@ module.exports = function(RED) {
             process_timer(msg, sm, method, stmnt, param);
             break;
           case "resetTimer":
-            if (sm.timeout && sm.timeout[param]) {
-              clearTimeout(sm.timeout[param]);
+            if (timeout[param]) {
+              clearTimeout(timeout[param]);
             }
             break;
           case "watchdog":
@@ -239,13 +244,10 @@ module.exports = function(RED) {
         }
       }
       
-      if (!sm.timeout) {
-        sm.timeout = {};
+      if (timeout[method]) {
+        clearTimeout(timeout[method]);
       }
-      if (sm.timeout[method]) {
-        clearTimeout(sm.timeout[method]);
-      }
-      sm.timeout[method] = setTimeout(function() {
+      timeout[method] = setTimeout(function() {
         if (typeof sm.send !== "undefined" && sm.send[method]) {
           msg.payload = sm.send[method];
           node.send(msg);
@@ -254,8 +256,7 @@ module.exports = function(RED) {
         } else {
           node.send(msg);
         }
-        clearTimeout(sm.timeout[method]);
-        sm.timeout[method] = null;
+        timeout[method] = null;
       }, param);
         
       output = false;
@@ -283,14 +284,11 @@ module.exports = function(RED) {
           sm.do[method] = stmnt.do.join('');
         }
       }
-    
-      if (!sm.timeout) {
-        sm.timeout = {};
+
+      if (timeout[method]) {
+        clearTimeout(timeout[method]);
       }
-      if (sm.timeout[method]) {
-        clearTimeout(sm.timeout[method]);
-      }
-      sm.timeout[method] = setTimeout(function() {
+      timeout[method] = setTimeout(function() {
         if (typeof sm.send !== "undefined" && sm.send[method]) {
           msg.payload = sm.send[method];
           node.send(msg);
@@ -299,8 +297,7 @@ module.exports = function(RED) {
         } else {
           node.send(msg);
         }
-        clearTimeout(sm.timeout[method]);
-        sm.timeout[method] = null;
+        timeout[method] = null;
       }, param);
         
       output = false;
