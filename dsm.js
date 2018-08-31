@@ -89,6 +89,8 @@ module.exports = function(RED) {
             if (typeof sm.methods !== "undefined") {
               if (sm.methods[method]) {
                 process_method(msg, sm, method);
+              } else if (sm.methods.default) {
+                process_method(msg, sm, "default");
               }
               if (sm.methods.onTransition) {
                 process_method(msg, sm, "onTransition");
