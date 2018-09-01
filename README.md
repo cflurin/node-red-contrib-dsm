@@ -74,11 +74,15 @@ In addition to states and transitions a `dsm` can also contain arbitrary data an
     },
     "methods": {
         "setDelay": "sm.data.delay = msg.payload;",
-        "getDelay": "msg.delay = sm.data.delay;"
+        "getDelay": "msg.delay = sm.data.delay;",
+        "default": "msg.payload = 'method undefined'"
     }
 }
 ```
+
 Methods can be any valid javascript statements. If the method name is the same as the transition name, both the transition and the method are processed.
+
+The method `default` is executed when no method is found in the methods list.
 
 To simplify editing methods can be defined as an array of comma separated strings:
 
