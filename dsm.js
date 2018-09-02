@@ -42,13 +42,14 @@ module.exports = function(RED) {
     node.status(sta);
     
     this.on('input', function(msg) {
+      var sm_on_input = {};
       output = false;
       
       sm = context.get('sm');
-      var sm_on_input = RED.util.cloneMessage(sm);
       if (typeof sm === "undefined") {
         sm_set = false;
       } else {
+        sm_on_input = RED.util.cloneMessage(sm);
         sm_set = true;
       }
       
@@ -143,15 +144,14 @@ module.exports = function(RED) {
     });
       
     function set_dsm(sm) {
-      var trans = [];
+      sm.trans = [];
       
       if (sm.states) {
         Object.keys(sm.states).forEach(function(key) {
           Object.keys(sm.states[key]).forEach(function(s) {
-            if (trans.indexOf(s) < 0) trans.push(s);
+            if (sm.trans.indexOf(s) < 0) sm.trans.push(s);
           });
         });
-        sm.trans = trans;
       }
       sta = {fill:"grey",shape:"dot",text:"dsm ready"};
     }
