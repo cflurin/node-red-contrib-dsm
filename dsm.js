@@ -61,7 +61,7 @@ module.exports = function(RED) {
             sm = msg.payload;
             set_dsm(sm);
             sm_set = true;
-            if(sm.states) {
+            if (sm.states) {
               const stateOutput = sm.stateOutput || "topic";
               RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
             }
@@ -111,7 +111,7 @@ module.exports = function(RED) {
           }
       }
       
-      if(sm_set) {
+      if (sm_set) {
         const globalOutput = sm.globalOutput || false;
         const flowOutput = sm.flowOutput || false;
         if (globalOutput) {
@@ -170,14 +170,6 @@ module.exports = function(RED) {
           sm.currentState = sm.states[state][tran];
           RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
           sta = {fill:"green",shape:"dot",text:sm.currentState};
-        } else {
-          if(sm.trans.indexOf(tran) > -1) {
-            sta = {fill:"green",shape:"dot",text:sm.currentState};
-          } else {
-            if (sm.methods && !sm.methods[method]) {
-              sta = {fill:"yellow",shape:"ring",text:tran+" undefined"};
-            }
-          }
         }
       }
     }
@@ -329,6 +321,13 @@ module.exports = function(RED) {
           }    
         }
       }
+    }
+    
+    function resume(trigger, msg) {
+      const triggerInput = sm.triggerInput || "topic";
+      msg[triggerInput] = trigger;
+      //node.warn(triggerInput+ ' '+msg[triggerInput]);
+      node.emit('input', msg);
     }
     
   }
