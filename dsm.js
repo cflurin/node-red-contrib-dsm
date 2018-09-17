@@ -330,15 +330,6 @@ module.exports = function(RED) {
       node.emit('input', msg);
     }
     
-    // return "YYYY-MM-DD_hh:mm:ss"
-    function timestamp() {
-      var d = new Date();
-      var y = d.getFullYear();
-      var m = d.getMonth() + 1; m = (m < 10) ? "0"+m:m;
-      var dd = d.getDate(); dd = (dd < 10) ? "0"+dd:dd;
-      var ts = y +"-"+ m +"-"+ dd +"_"+ d.toTimeString().substr(0,8);
-      return ts;
-    }
   }
   RED.nodes.registerType("dsm",DsmNode);
 };
