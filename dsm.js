@@ -145,7 +145,13 @@ module.exports = function(RED) {
       
     function set_dsm(sm) { 
       if (typeof sm.methods !== "undefined" && sm.methods.init) {
-        process_method(msg, sm, "init");
+        var stmnt = sm.methods.init;
+        
+        if (typeof stmnt === "string") {
+          eval(stmnt);
+        } else if (Array.isArray(stmnt)) {
+          eval(stmnt.join(''));
+        }
       }
       
       sta = {fill:"grey",shape:"dot",text:"dsm ready"};
