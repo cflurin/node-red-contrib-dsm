@@ -143,9 +143,15 @@ module.exports = function(RED) {
       }
     });
       
-    function set_dsm(sm) {
-      sm.trans = [];
+    function set_dsm(sm) { 
+      if (typeof sm.methods !== "undefined" && sm.methods.init) {
+        process_method(msg, sm, "init");
+      }
       
+      sta = {fill:"grey",shape:"dot",text:"dsm ready"};
+         
+      // experimental 'sm.trans' is not used
+      sm.trans = [];
       if (sm.states) {
         Object.keys(sm.states).forEach(function(key) {
           Object.keys(sm.states[key]).forEach(function(s) {
@@ -153,7 +159,6 @@ module.exports = function(RED) {
           });
         });
       }
-      sta = {fill:"grey",shape:"dot",text:"dsm ready"};
     }
     
     function process_tran(msg, sm, method) {

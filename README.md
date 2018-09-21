@@ -100,12 +100,14 @@ To simplify editing methods can be defined as an array of comma separated string
 
 ### General purpose methods
 
+* `init`
 * `onBeforeTransition`
 * `onTransition` 
 * `onAfterTransition` 
 * `status` defines an arbitrary status
 
 The general purpose methods are executed independently even without states.
+The `init` method is executed when the dsm is deployed respectively when the dsm is set. `init`  can be used to initialize values. 
 
 #### Example:
 
