@@ -148,7 +148,6 @@ To simplify the configuration build-in methods are available.
         "co2": 0
     },
     "methods": {
-        "set": "output=false;",
         "temperature": {
             "name": "setData"
         },
@@ -177,7 +176,6 @@ To simplify the configuration build-in methods are available.
         "delay2": 3000
     },
     "methods": {
-        "set": "output=false;",
         "timer1": {
             "name": "timer",
             "param": "delay1"
