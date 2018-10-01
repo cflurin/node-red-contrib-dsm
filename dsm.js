@@ -341,15 +341,25 @@ module.exports = function(RED) {
       node.emit('input', msg);
     }
     
-    // return "YYYY-MM-DD_hh:mm:ss"
+    // return "YYYY-MM-DDThh:mm:ss.sss"   
     function timestamp() {
       var d = new Date();
-      var y = d.getFullYear();
-      var m = d.getMonth() + 1; m = (m < 10) ? "0"+m:m;
-      var dd = d.getDate(); dd = (dd < 10) ? "0"+dd:dd;
-      var ts = y +"-"+ m +"-"+ dd +"_"+ d.toTimeString().substr(0,8);
-      return ts;
+      return d.getFullYear() +
+        '-' + pad(d.getMonth() + 1) +
+        '-' + pad(d.getDate()) +
+        'T' + pad(d.getHours()) +
+        ':' + pad(d.getMinutes()) +
+        ':' + pad(d.getSeconds()) +
+        '.' + (d.getMilliseconds() / 1000).toFixed(3).slice(2, 5);
     }
+    
+    function pad(number) {
+      if (number < 10) {
+        return '0' + number;
+      }
+      return number;
+    }
+
   }
   RED.nodes.registerType("dsm",DsmNode);
 };
