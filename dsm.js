@@ -8,6 +8,7 @@ module.exports = function(RED) {
     this.sm_set;
     this.sm = {};
     this.timeout = {};
+    this.obj = {};
     
     var node = this;
     var context = this.context();
@@ -16,6 +17,7 @@ module.exports = function(RED) {
     
     var sm = this.sm;
     var timeout = this.timeout;
+    var obj = this.obj;
     var sm_set = this.sm_set;
     var sta = {fill:"grey",shape:"dot",text:"dsm undefined"};
     var output;
