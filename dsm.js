@@ -172,6 +172,7 @@ module.exports = function(RED) {
     function process_tran(msg, sm, method) {
       const triggerInput = sm.triggerInput || "topic";
       const stateOutput = sm.stateOutput || "topic";
+      const preStateOutput = sm.preStateOutput || "preState";
       const state = sm.currentState;
       const tran = RED.util.getMessageProperty(msg,triggerInput);
       
@@ -180,6 +181,9 @@ module.exports = function(RED) {
       } else {
         if (sm.states[state][tran]) {
           output = true;
+          sm.preState = sm.currentState;
+          RED.util.setMessageProperty(msg,preStateOutput,sm.preState);
+                    
           sm.currentState = sm.states[state][tran];
           RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
           sta = {fill:"green",shape:"dot",text:sm.currentState};
@@ -234,7 +238,7 @@ module.exports = function(RED) {
         if (typeof stmnt.send === "string") {
           sm.send[method] = stmnt.send;
         } else {
-          if (typeof stmnt.send.get == "string") {
+          if (typeof stmnt.send.get === "string") {
             sm.send[method] = eval(stmnt.send.get);
           } else {
             if (Array.isArray(stmnt.send.get)) {
@@ -275,7 +279,7 @@ module.exports = function(RED) {
         if (typeof stmnt.send === "string") {
           sm.send[method] = stmnt.send;
         } else {
-          if (typeof stmnt.send.get == "string") {
+          if (typeof stmnt.send.get === "string") {
             sm.send[method] = eval(stmnt.send.get);
           } else {
             if (Array.isArray(stmnt.send.get)) {

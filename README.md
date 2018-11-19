@@ -12,8 +12,6 @@ The `dsm` properties can be defined in the `edit dsm node` window or by an input
 
 ![dsmconf](https://user-images.githubusercontent.com/5056710/42732001-ca361a6e-8818-11e8-8b24-c121ddbda784.jpeg)
 
-**Version 0.10.0** and higher supports `contextStorage` which has been introduced with node-red version 0.19.0.
-
 #### JSON object:
 
 ```
@@ -21,9 +19,11 @@ topic: "set"
 payload:
 {
     "triggerInput": "topic",
-    "stateOutput": "payload",
+    "stateOutput": "current",
+    "preStateOutput": "previous",
     "globalOutput": "my_global_var",
     "flowOutput": "my_flow_var",
+    "preState": null,
     "currentState": "state1",
     "states": {
         "state1": {
@@ -41,9 +41,11 @@ payload:
 }
 ```
 
-`triggerInput`, `stateOutput`, `globalOutput`and `flowOutput`can be omitted.
+`triggerInput`, `stateOutput`, `preStateOutput`, `globalOutput` and `flowOutput` can be omitted.
 
 `triggerInput` and `stateOutput` default `topic`.
+
+`preStateOutput` default ` `preState`
 
 `globalOutput` and `flowOutput` default `false`.
 
