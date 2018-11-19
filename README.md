@@ -3,7 +3,7 @@ A dynamic state machine node based on the [Finite state machine](https://en.wiki
 
 The `dsm` node is a pure Node.js package for Node Red, it doesn't use any external libraries. The dsm behaviour  is defined in a JSON format and can be optianally set/modified programmatically e.g. using an inject node. 
 
-#### Principle of operation [Source Wikipedia]
+#### Principle of operation [Wikipedia]
 *A finite-state machine (FSM) is an abstract machine that can be in exactly one of a finite number of states at any given time. The FSM can change from one state to another in response to some external inputs; the change from one state to another is called a transition. A FSM is defined by a list of its states, its initial state, and the conditions for each transition.*
 
 ## Usage
@@ -45,7 +45,7 @@ payload:
 
 `triggerInput` and `stateOutput` default `topic`.
 
-`preStateOutput` default ` `preState`
+`preStateOutput` default `preState`
 
 `globalOutput` and `flowOutput` default `false`.
 
