@@ -36,7 +36,7 @@ module.exports = function(RED) {
         if (typeof sm.currentState !== "undefined") {
           sta = {fill:"green",shape:"dot",text:sm.currentState};
         } else {
-          sta = {fill:"grey",shape:"dot",text:"dsm ready (contextStorage)"};
+          sta = {};
         }
       }
     }
@@ -63,7 +63,7 @@ module.exports = function(RED) {
             sm = msg.payload;
             set_dsm(sm);
             sm_set = true;
-            if (sm.states) {
+            if (sm.states && sm.currentState) {
               const stateOutput = sm.stateOutput || "topic";
               RED.util.setMessageProperty(msg,stateOutput,sm.currentState);
             }
@@ -116,10 +116,10 @@ module.exports = function(RED) {
       if (sm_set) {
         const globalOutput = sm.globalOutput || false;
         const flowOutput = sm.flowOutput || false;
-        if (globalOutput) {
+        if (globalOutput && sm.currentState) {
           global.set(globalOutput, sm.currentState);
         }
-        if (flowOutput) {
+        if (flowOutput && sm.currentState) {
           flow.set(flowOutput, sm.currentState);
         }
         if (!RED.util.compareObjects(sm, sm_on_input)) {
@@ -156,7 +156,11 @@ module.exports = function(RED) {
         }
       }
       
-      sta = {fill:"grey",shape:"dot",text:"dsm ready"};
+      if (sm.currentState) {
+        sta = {fill:"green",shape:"dot",text:sm.currentState};
+      } else {
+        sta = {};
+      }
          
       // experimental 'sm.trans' is not used
       sm.trans = [];
@@ -177,7 +181,7 @@ module.exports = function(RED) {
       const tran = RED.util.getMessageProperty(msg,triggerInput);
       
       if (typeof sm.states[state] === "undefined") {
-        sta = {fill:"red",shape:"ring",text:state+" undefined"};
+        sta = {fill:"red",shape:"ring",text:"state undefined"};
       } else {
         if (sm.states[state][tran]) {
           output = true;
