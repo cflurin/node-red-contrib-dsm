@@ -150,9 +150,9 @@ module.exports = function(RED) {
         var stmnt = sm.methods.init;
         
         if (typeof stmnt === "string") {
-          eval(stmnt);
+          execute(null, sm, stmnt);
         } else if (Array.isArray(stmnt)) {
-          eval(stmnt.join(''));
+          execute(null, sm, stmnt.join(''));
         }
       }
       
@@ -199,9 +199,9 @@ module.exports = function(RED) {
       var stmnt = sm.methods[method];
       
       if (typeof stmnt === "string") {
-        eval(stmnt);
+        execute(msg, sm, stmnt);
       } else if (Array.isArray(stmnt)) {
-          eval(stmnt.join(''));
+        execute(msg, sm, stmnt.join(''));
       } else { // build in methods
         var param;
         if (typeof sm.data !== "undefined" && typeof sm.data[stmnt.param] !== "undefined") {
@@ -243,10 +243,10 @@ module.exports = function(RED) {
           sm.send[method] = stmnt.send;
         } else {
           if (typeof stmnt.send.get === "string") {
-            sm.send[method] = eval(stmnt.send.get);
+            sm.send[method] = execute(msg, sm, stmnt.send.get);
           } else {
             if (Array.isArray(stmnt.send.get)) {
-              sm.send[method] = eval(stmnt.send.get.join(''));
+              sm.send[method] = execute(msg, sm, stmnt.send.get.join(''));
             }
           }
         }
@@ -267,7 +267,7 @@ module.exports = function(RED) {
           msg.payload = sm.send[method];
           node.send(msg);
         } else if (typeof sm.do !== "undefined" && sm.do[method]) {
-          eval(sm.do[method]);
+          execute(msg, sm, sm.do[method]);
         } else {
           node.send(msg);
         }
@@ -284,10 +284,10 @@ module.exports = function(RED) {
           sm.send[method] = stmnt.send;
         } else {
           if (typeof stmnt.send.get === "string") {
-            sm.send[method] = eval(stmnt.send.get);
+            sm.send[method] = execute(msg, sm, stmnt.send.get);
           } else {
             if (Array.isArray(stmnt.send.get)) {
-              sm.send[method] = eval(stmnt.send.get.join(''));
+              sm.send[method] = execute(msg, sm, stmnt.send.get.join(''));
             }
           }
         }
@@ -308,7 +308,7 @@ module.exports = function(RED) {
           msg.payload = sm.send[method];
           node.send(msg);
         } else if (typeof sm.do !== "undefined" && sm.do[method]) {
-          eval(sm.do[method]);
+          execute(msg, sm, sm.do[method]);
         } else {
           node.send(msg);
         }
@@ -335,12 +335,20 @@ module.exports = function(RED) {
         sta[prop] = status[prop];
       } else {
         if (typeof status[prop].get ===  "string") {
-          sta[prop] = eval(status[prop].get);
+          sta[prop] = execute(msg, sm, status[prop].get);
         } else {
           if (Array.isArray(status[prop].get)) {
-            sta[prop] = eval(status[prop].get.join(''));
+            sta[prop] = execute(msg, sm, status[prop].get.join(''));
           }    
         }
+      }
+    }
+    
+    function execute(msg, sm, stmnt) {
+      try {
+        return eval(stmnt);
+      } catch(err) {
+        node.error(err);
       }
     }
     
