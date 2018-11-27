@@ -32,6 +32,7 @@ module.exports = function(RED) {
       if (typeof sm === "undefined") {
         sm_set = false;
       } else {
+        set_dsm(sm);
         sm_set = true;
         if (typeof sm.currentState !== "undefined") {
           sta = {fill:"green",shape:"dot",text:sm.currentState};
