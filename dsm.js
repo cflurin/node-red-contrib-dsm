@@ -350,6 +350,7 @@ module.exports = function(RED) {
         return eval(stmnt);
       } catch(err) {
         node.error(err);
+        node.error(stmnt);
       }
     }
     
