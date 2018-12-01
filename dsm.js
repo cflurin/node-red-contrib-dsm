@@ -147,6 +147,12 @@ module.exports = function(RED) {
     });
       
     function set_dsm(sm) { 
+      if (sm.currentState) {
+        sta = {fill:"green",shape:"dot",text:sm.currentState};
+      } else {
+        sta = {};
+      }
+      
       if (typeof sm.methods !== "undefined" && sm.methods.init) {
         var stmnt = sm.methods.init;
         
@@ -156,14 +162,8 @@ module.exports = function(RED) {
           execute(null, sm, stmnt.join(''));
         }
       }
-      
-      if (sm.currentState) {
-        sta = {fill:"green",shape:"dot",text:sm.currentState};
-      } else {
-        sta = {};
-      }
-         
-      // experimental 'sm.trans' is not used
+            
+      /* experimental 'sm.trans' is not used
       sm.trans = [];
       if (sm.states) {
         Object.keys(sm.states).forEach(function(key) {
@@ -172,6 +172,7 @@ module.exports = function(RED) {
           });
         });
       }
+      */
     }
     
     function process_tran(msg, sm, method) {
