@@ -55,7 +55,49 @@ module.exports = function(RED) {
         sm_on_input = RED.util.cloneMessage(sm);
         sm_set = true;
       }
+            
+      process_input(msg);
       
+      if (sm_set) {
+        const globalOutput = sm.globalOutput || false;
+        const flowOutput = sm.flowOutput || false;
+        if (globalOutput && sm.currentState) {
+          global.set(globalOutput, sm.currentState);
+        }
+        if (flowOutput && sm.currentState) {
+          flow.set(flowOutput, sm.currentState);
+        }
+        // save sm if modified
+        if (!RED.util.compareObjects(sm, sm_on_input)) {
+          context.set('sm', sm);
+        }
+      }
+      
+      node.status(sta);
+      
+      if (output) {
+        if (sm.data) {
+          msg.data = sm.data;
+        }
+        node.send(msg);
+      }
+    });
+          
+    this.on('close', function(removed, done) {
+      // removed not used
+      if (Object.keys(timeout).length > 0) {
+        for (var k in timeout) {
+          clearTimeout(timeout[k]);
+        }
+      }
+      done();
+    });
+      
+    /**
+    * dsm specific functions
+    **/
+    
+    function process_input(msg) {      
       switch (msg.topic) {
         case "set":
           if (typeof msg.payload !== "object") {
@@ -112,41 +154,10 @@ module.exports = function(RED) {
               */
             }
           }
-      }
-      
-      if (sm_set) {
-        const globalOutput = sm.globalOutput || false;
-        const flowOutput = sm.flowOutput || false;
-        if (globalOutput && sm.currentState) {
-          global.set(globalOutput, sm.currentState);
-        }
-        if (flowOutput && sm.currentState) {
-          flow.set(flowOutput, sm.currentState);
-        }
-        if (!RED.util.compareObjects(sm, sm_on_input)) {
-          context.set('sm', sm);
-        }
-      }
-      
-      node.status(sta);
-      
-      if (output) {
-        if (sm.data) {
-          msg.data = sm.data;
-        }
-        node.send(msg);
-      }
-    });
-          
-    this.on('close', function() {
-      if (Object.keys(timeout).length > 0) {
-        for (var k in timeout) {
-          clearTimeout(timeout[k]);
-        }
-      }
-    });
-      
-    function set_dsm(sm) { 
+      }    
+    }
+    
+    function set_dsm(sm) {
       if (sm.currentState) {
         sta = {fill:"green",shape:"dot",text:sm.currentState};
       } else {
@@ -361,6 +372,10 @@ module.exports = function(RED) {
       //node.warn(triggerInput+ ' '+msg[triggerInput]);
       node.emit('input', msg);
     }
+    
+    /**
+    * utility functions
+    **/
     
     // return "YYYY-MM-DDThh:mm:ss.sss"   
     function timestamp() {
