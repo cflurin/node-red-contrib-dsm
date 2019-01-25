@@ -237,31 +237,16 @@ module.exports = function(RED) {
           case "timer":
             process_timer(msg, sm, method, stmnt, param);
             break;
-          case "resetTimer":
-            process_resetTimer(msg, sm, method, stmnt, param);
-            break;
           case "watchdog":
             process_watchdog(msg, sm, method, stmnt, param);
+            break;
+          case "resetTimer":
+            process_resetTimer(msg, sm, method, stmnt, param);
             break;
         }
       }
     }
-    
-    function process_resetTimer(msg, sm, method, stmnt, param) {
-      if (timeout[param]) {
-        clearTimeout(timeout[param]);
-      }
-      
-      parse_methods(msg, sm, method, stmnt);
-    
-      if (typeof sm.send !== "undefined" && sm.send[method]) {
-        msg.payload = sm.send[method];
-        node.send(msg);
-      } else if (typeof sm.do !== "undefined" && sm.do[method]) {
-        execute(msg, sm, sm.do[method]);
-      }
-    }
-        
+   
     function process_timer(msg, sm, method, stmnt, param) {
       if (timeout[method]) {
         clearTimeout(timeout[method]);
@@ -305,6 +290,23 @@ module.exports = function(RED) {
         timeout[method] = null;
       }, param);
         
+      output = false;
+    }
+    
+    function process_resetTimer(msg, sm, method, stmnt, param) {
+      if (timeout[param]) {
+        clearTimeout(timeout[param]);
+      }
+      
+      parse_methods(msg, sm, method, stmnt);
+    
+      if (typeof sm.send !== "undefined" && sm.send[method]) {
+        msg.payload = sm.send[method];
+        node.send(msg);
+      } else if (typeof sm.do !== "undefined" && sm.do[method]) {
+        execute(msg, sm, sm.do[method]);
+      }
+      
       output = false;
     }
     
