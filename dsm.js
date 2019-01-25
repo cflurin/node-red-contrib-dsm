@@ -238,9 +238,7 @@ module.exports = function(RED) {
             process_timer(msg, sm, method, stmnt, param);
             break;
           case "resetTimer":
-            if (timeout[param]) {
-              clearTimeout(timeout[param]);
-            }
+            process_resetTimer(msg, sm, method, stmnt, param);
             break;
           case "watchdog":
             process_watchdog(msg, sm, method, stmnt, param);
@@ -249,32 +247,28 @@ module.exports = function(RED) {
       }
     }
     
-    function process_timer(msg, sm, method, stmnt, param) {     
-      if (stmnt.send) {
-        if (!sm.send) sm.send = {};
-        if (typeof stmnt.send === "string") {
-          sm.send[method] = stmnt.send;
-        } else {
-          if (typeof stmnt.send.get === "string") {
-            sm.send[method] = execute(msg, sm, stmnt.send.get);
-          } else {
-            if (Array.isArray(stmnt.send.get)) {
-              sm.send[method] = execute(msg, sm, stmnt.send.get.join(''));
-            }
-          }
-        }
-      } else if (stmnt.do) {
-        if (!sm.do) sm.do = {}; 
-        if (typeof stmnt.do === "string") {
-          sm.do[method] = stmnt.do;
-        } else if (Array.isArray(stmnt.do)) {
-          sm.do[method] = stmnt.do.join('');
-        }
+    function process_resetTimer(msg, sm, method, stmnt, param) {
+      if (timeout[param]) {
+        clearTimeout(timeout[param]);
       }
       
+      parse_methods(msg, sm, method, stmnt);
+    
+      if (typeof sm.send !== "undefined" && sm.send[method]) {
+        msg.payload = sm.send[method];
+        node.send(msg);
+      } else if (typeof sm.do !== "undefined" && sm.do[method]) {
+        execute(msg, sm, sm.do[method]);
+      }
+    }
+        
+    function process_timer(msg, sm, method, stmnt, param) {
       if (timeout[method]) {
         clearTimeout(timeout[method]);
       }
+      
+      parse_methods(msg, sm, method, stmnt);
+            
       timeout[method] = setTimeout(function() {
         if (typeof sm.send !== "undefined" && sm.send[method]) {
           msg.payload = sm.send[method];
@@ -284,6 +278,7 @@ module.exports = function(RED) {
         } else {
           node.send(msg);
         }
+        node.status(sta);
         timeout[method] = null;
       }, param);
         
@@ -291,6 +286,29 @@ module.exports = function(RED) {
     }
     
     function process_watchdog(msg, sm, method, stmnt, param) {
+      if (timeout[method]) {
+        clearTimeout(timeout[method]);
+      }
+      
+      parse_methods(msg, sm, method, stmnt);
+      
+      timeout[method] = setTimeout(function() {
+        if (typeof sm.send !== "undefined" && sm.send[method]) {
+          msg.payload = sm.send[method];
+          node.send(msg);
+        } else if (typeof sm.do !== "undefined" && sm.do[method]) {
+          execute(msg, sm, sm.do[method]);
+        } else {
+          node.send(msg);
+        }
+        node.status(sta);
+        timeout[method] = null;
+      }, param);
+        
+      output = false;
+    }
+    
+    function parse_methods(msg, sm, method, stmnt) {
       if (stmnt.send) {
         if (!sm.send) sm.send = {};
         if (typeof stmnt.send === "string") {
@@ -312,23 +330,6 @@ module.exports = function(RED) {
           sm.do[method] = stmnt.do.join('');
         }
       }
-
-      if (timeout[method]) {
-        clearTimeout(timeout[method]);
-      }
-      timeout[method] = setTimeout(function() {
-        if (typeof sm.send !== "undefined" && sm.send[method]) {
-          msg.payload = sm.send[method];
-          node.send(msg);
-        } else if (typeof sm.do !== "undefined" && sm.do[method]) {
-          execute(msg, sm, sm.do[method]);
-        } else {
-          node.send(msg);
-        }
-        timeout[method] = null;
-      }, param);
-        
-      output = false;
     }
 
     function process_status(msg, sm, status) {
